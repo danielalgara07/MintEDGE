@@ -99,6 +99,9 @@ class EnergyModel(ABC):
             parent: The entity which the power model is responsible for
         """
 
+#--------------------Modelo potencia de servidor 0 (linear) -------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 class EnergyModelServer(EnergyModel):
     def __init__(self):
@@ -112,14 +115,108 @@ class EnergyModelServer(EnergyModel):
             )
         if not self.server.is_on:
             return EnergyMeasurement(dynamic=0, idle=0)
-        dynamic_power = (
-            (self.server.max_power - self.server.idle_power) / self.server.max_cap
-        ) * self.server.used_ops
+        dynamic_power = ((self.server.max_power - self.server.idle_power) / self.server.max_cap ) * self.server.used_ops
         return EnergyMeasurement(dynamic=dynamic_power, idle=self.server.idle_power)
 
     def set_parent(self, parent):
         self.server = parent
 
+#--------------------Modelo potencia de servidor 1 (powerlaw)------------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+class EnergyModelServerPowerLaw(EnergyModel):
+    
+    def __init__(self, alpha: float):
+        """
+        Modelo de energia:
+            P(u) = P_idle + (P_max - P_idle) * u^alpha
+
+        Args:
+            alpha (float): Exponente del modelo power-law.
+        
+         hace falta?
+        if alpha <= 0:
+            raise ValueError("alpha must be > 0")
+        """
+        self.alpha = alpha
+
+        
+    def measure(self) -> EnergyMeasurement:
+        if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
+            return EnergyMeasurement(dynamic=self.server.max_power,idle=self.server.idle_power)
+
+        # si está apagado no consume
+        if not self.server.is_on:
+            return EnergyMeasurement(dynamic=0, idle=0)
+        
+        # Validación para evitar división por cero y valores de utilización no válidos
+        if self.server.max_cap <= 0:
+            raise ValueError("server.max_cap must be > 0")
+
+        # U entre 0 y 1 
+        utilization = self.server.used_ops / self.server.max_cap
+        utilization = max(0.0, min(1.0, utilization))  # bueno añadirlo
+
+        dynamic_power = (self.server.max_power - self.server.idle_power) * (utilization ** self.alpha)
+
+        return EnergyMeasurement(dynamic=dynamic_power,idle=self.server.idle_power)
+    
+
+    def set_parent(self, parent):
+        self.server = parent
+    
+
+#--------------------Modelo potencia de servidor 2 (polynomial)----------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+class EnergyModelServerPolynomial(EnergyModel):
+    def __init__(self, alpha: float):
+        """
+        Energy model:
+            P(u) = P_idle + (P_max - P_idle) * (2u - u^alpha)
+
+        Args:
+            alpha (float): Exponente del modelo polynomial.
+        """
+        """ hace falta? ya se comprueba en check settings
+        if alpha <= 0:
+            raise ValueError("alpha must be > 0")
+        """
+        self.alpha = alpha
+
+    def measure(self) -> EnergyMeasurement:
+        # Durante boot consumo máximo
+        if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
+            return EnergyMeasurement(
+                dynamic=self.server.max_power,
+                idle=self.server.idle_power,
+            )
+
+        # Si está apagado no consume
+        if not self.server.is_on:
+            return EnergyMeasurement(dynamic=0, idle=0)
+
+        # Validación para evitar división por cero y valores de utilización no válidos
+        if self.server.max_cap <= 0:
+            raise ValueError("server.max_cap must be > 0")
+
+        # Utilización entre 0 y 1 
+        utilization  = self.server.used_ops / self.server.max_cap
+        utilization = max(0.0, min(1.0, utilization))
+
+        # Modelo polinómico con alpha
+        dynamic_power = ( self.server.max_power - self.server.idle_power ) * (2 * utilization - (utilization ** self.alpha))
+
+        return EnergyMeasurement(
+            dynamic=dynamic_power,
+            idle=self.server.idle_power,
+        )
+
+    def set_parent(self, parent):
+        self.server = parent
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 class EnergyModelLink(EnergyModel):
     def __init__(self, sigma: float):

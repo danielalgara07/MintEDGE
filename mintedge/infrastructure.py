@@ -8,11 +8,15 @@ from tqdm import tqdm
 from multipledispatch import dispatch
 
 import settings
+
+import settings
 from mintedge import (
     EnergyAware,
     EnergyMeasurement,
     EnergyModelLink,
     EnergyModelServer,
+    EnergyModelServerPowerLaw, 
+    EnergyModelServerPolynomial,
     Location,
     Service,
     User,
@@ -41,6 +45,7 @@ class EdgeServer(EnergyAware):
         "used_ops_bs_a",
         "boot_time",
         "last_onoff_time",
+        
     ]
 
     def __init__(
@@ -51,6 +56,7 @@ class EdgeServer(EnergyAware):
         idle_power: int,
         max_power: int,
         boot_time: Optional[int] = None,
+        
     ):
         """This class represents an edge server in the infrastructure.
 
@@ -71,12 +77,25 @@ class EdgeServer(EnergyAware):
         self.idle_power = idle_power
         self.max_power = max_power
         self.op_energy = (max_power - idle_power) / max_cap
-        self.energy_model = EnergyModelServer()
-        self.energy_model.set_parent(self)
+        #self.energy_model = EnergyModelServerPowerLaw(alpha) # CAMBIAR ESTO PARA PODER ELEGIR MODELO DE ENERGIA (EnergyModelServer() o EnergyModelServerPowerLaw(alpha=2))
+        #self.energy_model.set_parent(self)
         self.allocated_ops_bs_a: Dict[str, Dict[str, int]] = {}
         self.used_ops_bs_a: Dict[str, Dict[str, int]] = {}
         self.boot_time = boot_time
         self.last_onoff_time = 0
+        
+
+        # cambia el modelo de energia segun la configuracion
+        if settings.SERVER_ENERGY_MODEL == "linear":
+            self.energy_model = EnergyModelServer()
+        elif settings.SERVER_ENERGY_MODEL == "powerlaw":
+            self.energy_model = EnergyModelServerPowerLaw(alpha=settings.ALPHA)
+        elif settings.SERVER_ENERGY_MODEL == "polynomial":
+            self.energy_model = EnergyModelServerPolynomial(alpha=settings.ALPHA)
+        else:
+            raise ValueError("Unknown SERVER_ENERGY_MODEL")
+
+        self.energy_model.set_parent(self)
 
     def __repr__(self):
         return self.name

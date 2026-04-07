@@ -7,6 +7,9 @@ from .energy import (
     EnergyMeter,
     EnergyModelServer,
     EnergyModelLink,
+    EnergyModelServerPowerLaw,
+    EnergyModelServerPolynomial,
+
 )
 from .infrastructure import Infrastructure, EdgeServer, BaseStation, Link
 from .demand_predictor import IdealPredictor

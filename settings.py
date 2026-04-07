@@ -51,15 +51,17 @@ ROUTES_FILE = "./scenario/Luxembourg.rou.xml"
 # The number of cars, pedestrians and stationary users is only considered if
 # RANDOM_ROUTES is True
 NUMBER_OF_CARS = 2500
-NUMBER_OF_PEOPLE = 500
+NUMBER_OF_PEOPLE = 500 
 NUMBER_OF_STATIONARY = 100
 
 # The user count distribution expresses the share of active users over the total
 # for each hour of the day. You can combine this with RANDOM_ROUTES to generate
 # dynamic user counts.
 # fmt: off
-USER_COUNT_DISTRIBUTION = [0.13, 0.1, 0.07, 0.04, 0.03, 0.02, 0.02, 0.03, 0.04, 0.06, 0.08, 0.09, 0.1, 0.1, 0.11, 0.12, 0.12, 0.12, 0.13, 0.14, 0.15, 0.16, 0.16, 0.15, 0.13]
+# USER_COUNT_DISTRIBUTION = [0.13, 0.1, 0.07, 0.04, 0.03, 0.02, 0.02, 0.03, 0.04, 0.06, 0.08, 0.09, 0.1, 0.1, 0.11, 0.12, 0.12, 0.12, 0.13, 0.14, 0.15, 0.16, 0.16, 0.15, 0.13]
 # fmt: on
+
+USER_COUNT_DISTRIBUTION = [0.05, 0.2, 0.07, 0.04, 0.03, 0.02, 0.02, 0.03, 0.04, 0.06, 0.08, 0.09, 0.1, 0.1, 0.11, 0.12, 0.12, 0.12, 0.13, 0.14, 0.15, 0.16, 0.16, 0.15, 0.13]
 
 """BASE STATION"""
 BS_BANDWIDTH = 100e6  # 100 MHz (METIS-II Table 3-9 UC5 (connected cars))
@@ -85,11 +87,12 @@ SERVERS = [
     #     "MAX_CAPACITY": 22151384,
     #     "BOOT_TIME": 20,
     # },
-    {  # HP ProLiant DL380a Gen11 Intel Xeon Platinum 8480+ 2.0 GHz
+    {  # HP ProLiant DL380a Gen11 Intel Xeon Platinum 8480+ base=2.0 GHz, turbo=3.8 GHz,nominal=2.5 GHz 
         "MAX_POWER": 696,
         "IDLE_POWER": 222,
         "MAX_CAPACITY": 11260532,
         "BOOT_TIME": 20,
+        
     },
     # {  # FUJITSU Server PRIMERGY CX2560 M7 PRIMERGY CX400 M6
     #     "MAX_POWER": 2336,
@@ -115,3 +118,14 @@ SERVICES = [
     # VIDEO ANALYSIS
     Service("video_analysis", 30000, 6, 1500 * 1024, 20, 30e-3),
 ]
+
+# -------------------ENERGY MODELS---------------------------
+#------------------------------------------------------------
+# linear model: P = P_idle + (P_max - P_idle) * (used_capacity / max_capacity)
+# power law model: P = P_idle + (P_max - P_idle) * (used_capacity / max_capacity) ** alpha
+# polynomial model: P = P_idle + (P_max - P_idle) * (a * (used_capacity / max_capacity) ** 2 + b * (used_capacity / max_capacity) + c)
+
+# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha)
+
+SERVER_ENERGY_MODEL = "polynomial"
+ALPHA = 0.5

@@ -21,7 +21,7 @@ from pathlib import Path
 from shutil import which
 
 import mintedge
-import settings
+import settings as settings
 
 
 class MintEDGESettingsError(Exception):
@@ -417,6 +417,7 @@ class Simulation:
                     idle_power=ser_set["IDLE_POWER"],
                     max_power=ser_set["MAX_POWER"],
                     boot_time=ser_set["BOOT_TIME"],
+                    
                 )
             )
 
@@ -568,4 +569,17 @@ class Simulation:
         if settings.SERVICES is [] or settings.SERVICES is None:
             raise MintEDGESettingsError(
                 "At least one SERVICE type must be set in settings.py"
+            )
+        
+        # Comprobar que existen los parametros de modelo de energia y alpha en modelos concretos
+
+        if settings.SERVER_ENERGY_MODEL == None or not settings.SERVER_ENERGY_MODEL:
+            raise MintEDGESettingsError(
+                "SERVER_ENERGY_MODEL must be set in settings.py"
+            )
+        
+        modelswhithalpha = ["powerlaw", "polynomial"]
+        if settings.SERVER_ENERGY_MODEL in modelswhithalpha and (settings.ALPHA is None or settings.ALPHA <= 0):
+            raise MintEDGESettingsError(
+                "ALPHA must be set to a value > 0 for SERVER_ENERGY_MODEL"
             )
