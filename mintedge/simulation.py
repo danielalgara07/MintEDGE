@@ -417,6 +417,9 @@ class Simulation:
                     idle_power=ser_set["IDLE_POWER"],
                     max_power=ser_set["MAX_POWER"],
                     boot_time=ser_set["BOOT_TIME"],
+                    total_cores=ser_set["TOTAL_CORES"],
+                    base_freq=ser_set["BASE_FREQ"],
+                    max_freq=ser_set["MAX_FREQ"],
                     
                 )
             )

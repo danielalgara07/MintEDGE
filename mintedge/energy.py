@@ -215,23 +215,70 @@ class EnergyModelServerPolynomial(EnergyModel):
 
     def set_parent(self, parent):
         self.server = parent
+
+
+#--------------------Modelo potencia de servidor 3 (frecuencia)----------------
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
-class EnergyModelLink(EnergyModel):
-    def __init__(self, sigma: float):
-        """Energy model for a link.
-        Args:
-            sigma (float): Power per bit transmitted through the link
+class EnergyModelServerFrequency(EnergyModel):
+    def __init__(self):
+        """Modelo energético de servidor basado en frecuencia normalizada."""
+        pass
+
+    def get_normalized_frequency(self) -> float:
         """
-        self.sigma = sigma
+        Calcula la frecuencia normalizada:
+            f_n = (f - f_base) / (f_max - f_base)
+
+        Debe devolver un valor entre 0 y 1.
+        """
+        f = self.server.get_current_frequency()
+        f_base = self.server.min_frequency
+        f_max = self.server.max_frequency
+
+        if f_max <= f_base:
+            return 1.0
+
+        f_n = (f - f_base) / (f_max - f_base)
+
+        # Limitar por seguridad al rango [0, 1]
+        return max(0.0, min(1.0, f_n))
 
     def measure(self) -> EnergyMeasurement:
-        dynamic_power = self.sigma * self.link.used_capacity
-        return EnergyMeasurement(dynamic=dynamic_power, idle=0)
+        """
+        Devuelve una medición separando:
+        - idle: potencia base del servidor
+        - dynamic: potencia extra dependiente de frecuencia
+        """
+        # Durante el arranque
+        if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
+            return EnergyMeasurement(
+                dynamic=self.server.max_power - self.server.idle_power,
+                idle=self.server.idle_power,
+            )
+
+        # Servidor apagado
+        if not self.server.is_on:
+            return EnergyMeasurement(dynamic=0.0, idle=0.0)
+
+        f_n = self.get_normalized_frequency()
+
+        c0 = self.server.idle_power
+        c1 = self.server.max_power - self.server.idle_power
+
+        dynamic_power = c1 * (f_n ** 3)
+
+        return EnergyMeasurement(
+            dynamic=dynamic_power,
+            idle=c0,
+        )
 
     def set_parent(self, parent):
-        self.link = parent
+        self.server = parent
+   
 
 
 class EnergyAware(ABC):
