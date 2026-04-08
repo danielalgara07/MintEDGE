@@ -268,6 +268,44 @@ class EdgeServer(EnergyAware):
             raise MintEDGEInfrastructureError(
                 f"Cannot allocate {math.floor(req * a.workload)} requests on server {self.name} for {src.name},{a.name}."
             )
+        
+    def get_active_cores(self) -> int:
+        """Estimate the number of active cores from the current utilization."""
+        if not self.is_on or self.used_ops <= 0:
+            self.active_cores = 0
+            return 0
+
+        u = self.get_utilization()
+        cores = math.ceil(u * self.total_cores)
+        cores = max(1, min(self.total_cores, cores)) # por lo menos un core activo si hay carga, y no se puede superar el total de cores
+
+        self.active_cores = cores
+        return cores
+    
+    def get_current_frequency(self) -> float:
+        """ 
+        # Estimate CPU frequency from the number of active cores.
+
+        active = self.get_active_cores()
+
+        if active == 0:
+            self.current_frequency = self.min_freq
+            return self.current_frequency
+
+        # Política simple por tramos:
+        # pocos cores -> frecuencia alta
+        # muchos cores -> frecuencia baja
+        if active <= 16:
+            freq = self.max_freq       # 2.10 GHz
+        elif active <= 40:
+            freq = self.base_freq      # 2.00 GHz
+        else:
+            freq = self.min_freq       # 1.70 GHz
+
+        self.current_frequency = freq
+        return freq
+  
+        """
 
 
 class BaseStation:
