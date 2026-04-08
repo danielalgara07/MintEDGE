@@ -86,12 +86,21 @@ SERVERS = [
     #     "IDLE_POWER": 415,
     #     "MAX_CAPACITY": 22151384,
     #     "BOOT_TIME": 20,
+
+    #     "MAX_FREQUENCY": ,
+    #     "MIN_FREQUENCY": ,
+    #     "TOTAL_CORES": ,
     # },
     {  # HP ProLiant DL380a Gen11 Intel Xeon Platinum 8480+ base=2.0 GHz, turbo=3.8 GHz,nominal=2.5 GHz 
         "MAX_POWER": 696,
         "IDLE_POWER": 222,
         "MAX_CAPACITY": 11260532,
         "BOOT_TIME": 20,
+
+        "MAX_FREQUENCY": 3.8e9,
+        "MIN_FREQUENCY": 2.0e9,
+        "TOTAL_CORES": 56,
+
         
     },
     # {  # FUJITSU Server PRIMERGY CX2560 M7 PRIMERGY CX400 M6
@@ -99,6 +108,10 @@ SERVERS = [
     #     "IDLE_POWER": 541,
     #     "MAX_CAPACITY": 33244766,
     #     "BOOT_TIME": 20,
+
+    #     "MAX_FREQUENCY": ,
+    #     "MIN_FREQUENCY": ,
+    #     "TOTAL_CORES": ,
     # },
 ]
 # Data from OpenSpecPower
