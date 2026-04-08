@@ -45,6 +45,12 @@ class EdgeServer(EnergyAware):
         "used_ops_bs_a",
         "boot_time",
         "last_onoff_time",
+
+        "total_cores",
+        "max_frequency",
+        "min_frequency",
+        "active_cores",
+        "current_frequency",
         
     ]
 
@@ -55,7 +61,11 @@ class EdgeServer(EnergyAware):
         max_cap: int,
         idle_power: int,
         max_power: int,
+        total_cores: int,
+        max_frequency: float,
+        min_frequency: float,
         boot_time: Optional[int] = None,
+        
         
     ):
         """This class represents an edge server in the infrastructure.
@@ -84,6 +94,11 @@ class EdgeServer(EnergyAware):
         self.boot_time = boot_time
         self.last_onoff_time = 0
         
+        self.total_cores = total_cores
+        self.max_frequency = max_frequency
+        self.min_frequency = min_frequency
+        self.active_cores = 0
+        self.current_frequency = min_frequency
 
         # cambia el modelo de energia segun la configuracion
         if settings.SERVER_ENERGY_MODEL == "linear":
