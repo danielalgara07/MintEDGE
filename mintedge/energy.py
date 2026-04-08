@@ -220,13 +220,12 @@ class EnergyModelServerPolynomial(EnergyModel):
 #--------------------Modelo potencia de servidor 3 (frecuencia)----------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
-#------------------------------------------------------------------------------
+
 
 class EnergyModelServerFrequency(EnergyModel):
-    def __init__(self):
+    def __init__(self, alpha: float):
         """Modelo energético de servidor basado en frecuencia normalizada."""
-        pass
+        self.alpha = alpha
 
     def get_normalized_frequency(self) -> float:
         """
@@ -235,7 +234,7 @@ class EnergyModelServerFrequency(EnergyModel):
 
         Debe devolver un valor entre 0 y 1.
         """
-        f = self.server.get_current_frequency()
+        f = self.server.get_frequency(self.alpha)
         f_base = self.server.min_frequency
         f_max = self.server.max_frequency
 
@@ -278,7 +277,8 @@ class EnergyModelServerFrequency(EnergyModel):
 
     def set_parent(self, parent):
         self.server = parent
-   
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 
 class EnergyAware(ABC):

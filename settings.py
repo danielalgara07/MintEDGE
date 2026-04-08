@@ -137,8 +137,12 @@ SERVICES = [
 # linear model: P = P_idle + (P_max - P_idle) * (used_capacity / max_capacity)
 # power law model: P = P_idle + (P_max - P_idle) * (used_capacity / max_capacity) ** alpha
 # polynomial model: P = P_idle + (P_max - P_idle) * (a * (used_capacity / max_capacity) ** 2 + b * (used_capacity / max_capacity) + c)
+# frequency-based model: P = P_idle + (P_max - P_idle) * (f / f_max) ** 3 
+#                        - if alpha < 1, the frequency increases faster at lower utilizations, which can save energy when the load is low
+#                        - if alpha > 1, the frequency increases faster at higher utilizations, which can save energy when the load is high
 
-# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha)
+
+# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha), "frequency"(apasarle alpha)
 
 SERVER_ENERGY_MODEL = "polynomial"
 ALPHA = 0.5

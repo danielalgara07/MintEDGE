@@ -17,6 +17,7 @@ from mintedge import (
     EnergyModelServer,
     EnergyModelServerPowerLaw, 
     EnergyModelServerPolynomial,
+    EnergyModelServerFrequency,
     Location,
     Service,
     User,
@@ -107,6 +108,8 @@ class EdgeServer(EnergyAware):
             self.energy_model = EnergyModelServerPowerLaw(alpha=settings.ALPHA)
         elif settings.SERVER_ENERGY_MODEL == "polynomial":
             self.energy_model = EnergyModelServerPolynomial(alpha=settings.ALPHA)
+        elif settings.SERVER_ENERGY_MODEL == "frequency":
+            self.energy_model = EnergyModelServerFrequency(alpha=settings.ALPHA)
         else:
             raise ValueError("Unknown SERVER_ENERGY_MODEL")
 
@@ -282,7 +285,7 @@ class EdgeServer(EnergyAware):
         self.active_cores = cores
         return cores
     
-    def get_current_frequency(self) -> float:
+    def get_frequency(self, alpha: float) -> float:
          
         """
             Estimate CPU frequency from the number of active cores.
@@ -297,7 +300,7 @@ class EdgeServer(EnergyAware):
 
         freq = self.base_freq + (
             self.max_freq - self.base_freq
-        ) * (r ** settings.alpha)  # power law scaling
+        ) * (r ** alpha)  # power law scaling
 
         self.current_frequency = max(self.base_freq, min(self.max_freq, freq))
         return self.current_frequency

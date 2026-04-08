@@ -9,6 +9,7 @@ from .energy import (
     EnergyModelLink,
     EnergyModelServerPowerLaw,
     EnergyModelServerPolynomial,
+    EnergyModelServerFrequency,
 
 )
 from .infrastructure import Infrastructure, EdgeServer, BaseStation, Link
