@@ -276,36 +276,32 @@ class EdgeServer(EnergyAware):
             return 0
 
         u = self.get_utilization()
-        cores = math.ceil(u * self.total_cores)
+        cores = math.ceil(u * self.total_cores) #
         cores = max(1, min(self.total_cores, cores)) # por lo menos un core activo si hay carga, y no se puede superar el total de cores
 
         self.active_cores = cores
         return cores
     
     def get_current_frequency(self) -> float:
-        """ 
-        # Estimate CPU frequency from the number of active cores.
-
+         
+        """
+            Estimate CPU frequency from the number of active cores.
+        """
         active = self.get_active_cores()
 
         if active == 0:
-            self.current_frequency = self.min_freq
+            self.current_frequency = self.base_freq
             return self.current_frequency
 
-        # Política simple por tramos:
-        # pocos cores -> frecuencia alta
-        # muchos cores -> frecuencia baja
-        if active <= 16:
-            freq = self.max_freq       # 2.10 GHz
-        elif active <= 40:
-            freq = self.base_freq      # 2.00 GHz
-        else:
-            freq = self.min_freq       # 1.70 GHz
+        r = active / self.total_cores
 
-        self.current_frequency = freq
-        return freq
-  
-        """
+        freq = self.base_freq + (
+            self.max_freq - self.base_freq
+        ) * (r ** settings.alpha)  # power law scaling
+
+        self.current_frequency = max(self.base_freq, min(self.max_freq, freq))
+        return self.current_frequency
+        
 
 
 class BaseStation:
