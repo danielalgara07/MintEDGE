@@ -280,6 +280,20 @@ class EnergyModelServerFrequency(EnergyModel):
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
+class EnergyModelLink(EnergyModel):
+    def __init__(self, sigma: float):
+        """Energy model for a link.
+        Args:
+            sigma (float): Power per bit transmitted through the link
+        """
+        self.sigma = sigma
+
+    def measure(self) -> EnergyMeasurement:
+        dynamic_power = self.sigma * self.link.used_capacity
+        return EnergyMeasurement(dynamic=dynamic_power, idle=0)
+
+    def set_parent(self, parent):
+        self.link = parent
 
 class EnergyAware(ABC):
     @abstractmethod

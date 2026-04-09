@@ -145,4 +145,4 @@ SERVICES = [
 # modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha), "frequency"(apasarle alpha)
 
 SERVER_ENERGY_MODEL = "polynomial"
-ALPHA = 0.5
+ALPHA = 1
