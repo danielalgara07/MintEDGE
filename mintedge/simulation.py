@@ -21,7 +21,7 @@ from pathlib import Path
 from shutil import which
 
 import mintedge
-import settings as settings
+import settings 
 
 
 class MintEDGESettingsError(Exception):
@@ -417,8 +417,8 @@ class Simulation:
                     idle_power=ser_set["IDLE_POWER"],
                     max_power=ser_set["MAX_POWER"],
                     total_cores=ser_set["TOTAL_CORES"],
-                    max_freq=ser_set["MAX_FREQUENCY"],
-                    min_freq=ser_set["MIN_FREQUENCY"],
+                    max_frequency=ser_set["MAX_FREQUENCY"],
+                    min_frequency=ser_set["MIN_FREQUENCY"],
                     boot_time=ser_set["BOOT_TIME"],
 
                 )
@@ -581,7 +581,7 @@ class Simulation:
                 "SERVER_ENERGY_MODEL must be set in settings.py"
             )
         
-        modelswhithalpha = ["powerlaw", "polynomial"]
+        modelswhithalpha = ["powerlaw", "polynomial", "frequency"]
         if settings.SERVER_ENERGY_MODEL in modelswhithalpha and (settings.ALPHA is None or settings.ALPHA <= 0):
             raise MintEDGESettingsError(
                 "ALPHA must be set to a value > 0 for SERVER_ENERGY_MODEL"
