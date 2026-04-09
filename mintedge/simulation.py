@@ -59,7 +59,7 @@ class Simulation:
         self._check_settings()
         with contextlib.suppress(AttributeError):
             if (
-                settings.NORTH is not None
+                settings.NORTH is not None 
                 and settings.SOUTH is not None
                 and settings.EAST is not None
                 and settings.WEST is not None
@@ -416,11 +416,11 @@ class Simulation:
                     ser_set["MAX_CAPACITY"],
                     idle_power=ser_set["IDLE_POWER"],
                     max_power=ser_set["MAX_POWER"],
-                    boot_time=ser_set["BOOT_TIME"],
                     total_cores=ser_set["TOTAL_CORES"],
-                    base_freq=ser_set["BASE_FREQ"],
-                    max_freq=ser_set["MAX_FREQ"],
-                    
+                    max_freq=ser_set["MAX_FREQUENCY"],
+                    min_freq=ser_set["MIN_FREQUENCY"],
+                    boot_time=ser_set["BOOT_TIME"],
+
                 )
             )
 

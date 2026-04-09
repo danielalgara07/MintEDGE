@@ -30,10 +30,10 @@ API_MIRRORS = [
 # NORTH, SOUTH, EAST, WEST = 52.4788, 52.3525, 5.9268, 5.7536
 
 # Maastrichts's coordinates
-NORTH, SOUTH, EAST, WEST = 50.8695, 50.8303, 5.7417, 5.6415
+# NORTH, SOUTH, EAST, WEST = 50.8695, 50.8303, 5.7417, 5.6415
 
 # Luxembourg's state coordinates
-# NORTH, SOUTH, EAST, WEST = 50.1848, 49.4457, 6.5341, 5.7307
+NORTH, SOUTH, EAST, WEST = 50.1848, 49.4457, 6.5341, 5.7307
 
 # Luxembourg's city coordinates
 # NORTH, SOUTH, EAST, WEST = 49.7575, 49.4139, 6.45978, 5.75931
@@ -142,7 +142,7 @@ SERVICES = [
 #                        - if alpha > 1, the frequency increases faster at higher utilizations, which can save energy when the load is high
 
 
-# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha), "frequency"(apasarle alpha)
+# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha), "frequency"(pasarle alpha)
 
-SERVER_ENERGY_MODEL = "polynomial"
+SERVER_ENERGY_MODEL = "frequency"
 ALPHA = 1
