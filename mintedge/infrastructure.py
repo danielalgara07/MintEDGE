@@ -271,7 +271,7 @@ class EdgeServer(EnergyAware):
             raise MintEDGEInfrastructureError(
                 f"Cannot allocate {math.floor(req * a.workload)} requests on server {self.name} for {src.name},{a.name}."
             )
-        
+     
     def get_active_cores(self) -> int:
         """Estimate the number of active cores from the current utilization."""
         if not self.is_on or self.used_ops <= 0:
@@ -304,8 +304,27 @@ class EdgeServer(EnergyAware):
 
         self.current_frequency = max(self.base_freq, min(self.max_freq, freq))
         return self.current_frequency
+        '''
+    def get_effective_utilization(self) -> float:
         
+        effective_ops = max(self.used_ops, self.allocated_ops)
 
+        if self.max_cap <= 0:
+            return 0.0
+
+        u = effective_ops / self.max_cap
+        return max(0.0, min(1.0, u))
+
+    def get_frequency(self, alpha: float) -> float:
+        
+        u = self.get_effective_utilization()
+
+        scaled_u = u ** alpha
+
+        return self.min_frequency + (
+            self.max_frequency - self.min_frequency
+        ) * scaled_u
+'''
 
 class BaseStation:
     __slots__ = ["name", "rate", "location", "server", "users"]

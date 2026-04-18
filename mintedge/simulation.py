@@ -21,7 +21,7 @@ from pathlib import Path
 from shutil import which
 
 import mintedge
-import settings 
+import settings as settings
 
 
 class MintEDGESettingsError(Exception):
@@ -59,14 +59,15 @@ class Simulation:
         self._check_settings()
         with contextlib.suppress(AttributeError):
             if (
-                settings.NORTH is not None 
+                (settings.NET_FILE is None or not os.path.isfile(settings.NET_FILE))
+                and settings.NORTH is not None
                 and settings.SOUTH is not None
                 and settings.EAST is not None
                 and settings.WEST is not None
             ):
                 self.create_sumo_net(
-                    settings.NORTH, settings.SOUTH, settings.EAST, settings.WEST
-                )
+                settings.NORTH, settings.SOUTH, settings.EAST, settings.WEST
+            )
 
     def run(self):
         """
