@@ -20,22 +20,22 @@ API_MIRRORS = [
 ]
 
 # Some examples of coordinates
-# Twente's coordinates
+# Twente's coordinates -->  funciona
 NORTH, SOUTH, EAST, WEST = 52.4914, 52.1175, 7.0827, 6.3264
 
-# Enschede + Hengelo's coordinates
+# Enschede + Hengelo's coordinates --> funciona
 # NORTH, SOUTH, EAST, WEST = 52.2978, 52.1796, 6.9519, 6.7456
 
-# Elburg's coordinates
+# Elburg's coordinates --> funciona
 # NORTH, SOUTH, EAST, WEST = 52.4788, 52.3525, 5.9268, 5.7536
 
-# Maastrichts's coordinates
+# Maastrichts's coordinates--> funciona
 # NORTH, SOUTH, EAST, WEST = 50.8695, 50.8303, 5.7417, 5.6415
 
-# Luxembourg's state coordinates
+# Luxembourg's state coordinates--> funciona
 # NORTH, SOUTH, EAST, WEST = 50.1848, 49.4457, 6.5341, 5.7307
 
-# Luxembourg's city coordinates
+# Luxembourg's city coordinates --> crea el mapa, pero da error
 # NORTH, SOUTH, EAST, WEST = 49.7575, 49.4139, 6.45978, 5.75931
 
 PROVIDER = "vodafone"
@@ -100,6 +100,14 @@ SERVERS = [
         "MAX_FREQUENCY": 3.8e9,
         "MIN_FREQUENCY": 2.0e9,
         "TOTAL_CORES": 56,
+        
+        "FREQUENCY_POWER_STATES": [
+            {"FREQUENCY": 2.0e9, "POWER": 222},
+            {"FREQUENCY": 2.4e9, "POWER": 300},
+            {"FREQUENCY": 2.8e9, "POWER": 410},
+            {"FREQUENCY": 3.2e9, "POWER": 560},
+            {"FREQUENCY": 3.8e9, "POWER": 696},
+        ],
 
         
     },

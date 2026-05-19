@@ -23,7 +23,7 @@ SOFTWARE."""
 
 from abc import ABC, abstractmethod
 from functools import reduce
-from typing import Union, Collection, Callable, Optional, Iterable
+from typing import Union, Collection, Callable, Optional, Iterable, Sequence
 
 # import simpy
 from simpy.core import Environment
@@ -221,62 +221,65 @@ class EnergyModelServerPolynomial(EnergyModel):
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 
-
 class EnergyModelServerFrequency(EnergyModel):
-    def __init__(self, alpha: float):
-        """Modelo energético de servidor basado en frecuencia normalizada."""
-        self.alpha = alpha
-
-    def get_normalized_frequency(self) -> float:
+    def __init__(self):
         """
-        Calcula la frecuencia normalizada:
-            f_n = (f - f_base) / (f_max - f_base)
+        Modelo energético basado en:
 
-        Debe devolver un valor entre 0 y 1.
+            P = C0 + A * C * V^2 * f
+
+        C0 se toma como idle_power del servidor.
+        A, C, V y f están almacenados o calculados en EdgeServer.
         """
-        f = self.server.get_frequency(self.alpha)
-        f_base = self.server.min_frequency
-        f_max = self.server.max_frequency
+        pass
 
-        if f_max <= f_base:
-            return 1.0
-
-        f_n = (f - f_base) / (f_max - f_base)
-
-        # Limitar por seguridad al rango [0, 1]
-        return max(0.0, min(1.0, f_n))
+    def set_parent(self, parent):
+        self.server = parent
 
     def measure(self) -> EnergyMeasurement:
         """
-        Devuelve una medición separando:
-        - idle: potencia base del servidor
-        - dynamic: potencia extra dependiente de frecuencia
+        Calcula la potencia consumida por el servidor en el instante actual.
         """
-        # Durante el arranque
+
+        # Durante el arranque mantenemos un consumo alto
         if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
             return EnergyMeasurement(
                 dynamic=self.server.max_power - self.server.idle_power,
                 idle=self.server.idle_power,
             )
 
-        # Servidor apagado
+        # Si el servidor está apagado, no consume
         if not self.server.is_on:
-            return EnergyMeasurement(dynamic=0.0, idle=0.0)
+            return EnergyMeasurement(dynamic=0, idle=0)
 
-        f_n = self.get_normalized_frequency()
-
-        c0 = self.server.idle_power
-        c1 = self.server.max_power - self.server.idle_power
-
-        dynamic_power = c1 * (f_n ** 3)
-
-        return EnergyMeasurement(
-            dynamic=dynamic_power,
-            idle=c0,
+        utilization, active_cores, frequency, voltage = (
+            self.server.get_current_operating_point()
         )
 
-    def set_parent(self, parent):
-        self.server = parent
+        # Sin carga: solo potencia idle.
+        if active_cores == 0:
+            return EnergyMeasurement(dynamic=0, idle=self.server.idle_power)
+
+        # Fórmula dinámica:
+        # Pdynamic = A * C * V^2 * f
+        dynamic_power = (
+            self.server.activity_factor
+            * self.server.capacitance
+            * (voltage ** 2)
+            * frequency
+        )
+
+        # Ajuste por cores activos.
+        dynamic_power *= active_cores / self.server.total_cores
+
+        # Seguridad: no dejamos que supere la potencia dinámica máxima del servidor.
+        max_dynamic_power = self.server.max_power - self.server.idle_power
+        dynamic_power = min(dynamic_power, max_dynamic_power)
+
+        return EnergyMeasurement(dynamic=dynamic_power, idle=self.server.idle_power)
+    
+
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 

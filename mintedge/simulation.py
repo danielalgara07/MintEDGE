@@ -421,6 +421,10 @@ class Simulation:
                     max_frequency=ser_set["MAX_FREQUENCY"],
                     min_frequency=ser_set["MIN_FREQUENCY"],
                     boot_time=ser_set["BOOT_TIME"],
+                    activity_factor=ser_set["ACTIVITY_FACTOR"],
+                    capacitance=ser_set["CAPACITANCE"],
+                    frequencies=ser_set["FREQUENCIES"], # esta gestionado por un diccionario, cambiar
+                    voltages=ser_set["VOLTAGES"], # esta gestionado por un diccionario, cambiar
 
                 )
             )

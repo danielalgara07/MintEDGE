@@ -21,6 +21,7 @@ from mintedge import (
     Location,
     Service,
     User,
+
 )
 
 
@@ -52,23 +53,32 @@ class EdgeServer(EnergyAware):
         "min_frequency",
         "active_cores",
         "current_frequency",
+        "total_cores",
+        "frequencies",
+        "voltages",
+        "activity_factor",
+        "capacitance",
         
     ]
 
     def __init__(
-        self,
-        env: Environment,
-        name: str,
-        max_cap: int,
-        idle_power: int,
-        max_power: int,
-        total_cores: int,
-        max_frequency: float,
-        min_frequency: float,
-        boot_time: Optional[int] = None,
-        
-        
-    ):
+            self,env: Environment,
+            name: str,
+            max_cap: int,
+            idle_power: int,
+            max_power: int,
+            total_cores: int,
+            max_frequency: float,
+            min_frequency: float,
+            boot_time: Optional[int] = None,
+
+
+            frequencies: Optional[List[float]] = None,
+            voltages: Optional[List[float]] = None,
+            activity_factor: float = 0.5,
+            capacitance: float = 1.0,
+        ):
+
         """This class represents an edge server in the infrastructure.
 
         Args:
@@ -88,8 +98,7 @@ class EdgeServer(EnergyAware):
         self.idle_power = idle_power
         self.max_power = max_power
         self.op_energy = (max_power - idle_power) / max_cap
-        #self.energy_model = EnergyModelServerPowerLaw(alpha) # CAMBIAR ESTO PARA PODER ELEGIR MODELO DE ENERGIA (EnergyModelServer() o EnergyModelServerPowerLaw(alpha=2))
-        #self.energy_model.set_parent(self)
+        
         self.allocated_ops_bs_a: Dict[str, Dict[str, int]] = {}
         self.used_ops_bs_a: Dict[str, Dict[str, int]] = {}
         self.boot_time = boot_time
@@ -100,6 +109,10 @@ class EdgeServer(EnergyAware):
         self.min_frequency = min_frequency
         self.active_cores = 0
         self.current_frequency = min_frequency
+        self.frequencies = frequencies if frequencies is not None else [min_frequency, max_frequency]
+        self.voltages = voltages if voltages is not None else [1.0, 1.0]
+        self.activity_factor = activity_factor
+        self.capacitance = capacitance
 
         # cambia el modelo de energia segun la configuracion
         if settings.SERVER_ENERGY_MODEL == "linear":
@@ -109,7 +122,8 @@ class EdgeServer(EnergyAware):
         elif settings.SERVER_ENERGY_MODEL == "polynomial":
             self.energy_model = EnergyModelServerPolynomial(alpha=settings.ALPHA)
         elif settings.SERVER_ENERGY_MODEL == "frequency":
-            self.energy_model = EnergyModelServerFrequency(alpha=settings.ALPHA)
+            self.energy_model = EnergyModelServerFrequency()
+            # 
         else:
             raise ValueError("Unknown SERVER_ENERGY_MODEL")
 
@@ -272,59 +286,74 @@ class EdgeServer(EnergyAware):
                 f"Cannot allocate {math.floor(req * a.workload)} requests on server {self.name} for {src.name},{a.name}."
             )
      
+
+    # Metodos para calculo de energia con DVFS
+    #------------------------------------------
     def get_active_cores(self) -> int:
-        """Estimate the number of active cores from the current utilization."""
-        if not self.is_on or self.used_ops <= 0:
-            self.active_cores = 0
+        """
+        Estima cuántos cores están activos según la utilización actual.
+        """
+
+        utilization = self.get_utilization()
+
+        if utilization <= 0:
             return 0
 
-        u = self.get_utilization()
-        cores = math.ceil(u * self.total_cores) #
-        cores = max(1, min(self.total_cores, cores)) # por lo menos un core activo si hay carga, y no se puede superar el total de cores
+        active_cores = round(utilization * self.total_cores)
+        return max(1, min(self.total_cores, active_cores))
 
-        self.active_cores = cores
-        return cores
-    
-    def get_frequency(self, alpha: float) -> float:
-         
+
+    def get_frequency_index(self) -> int:
         """
-            Estimate CPU frequency from the number of active cores.
+        Selecciona el índice de frecuencia según la carga actual.
+
+        utilization = 0.0 -> primera frecuencia
+        utilization = 1.0 -> última frecuencia
         """
-        active = self.get_active_cores()
 
-        if active == 0:
-            self.current_frequency = self.base_freq
-            return self.current_frequency
+        utilization = self.get_utilization()
 
-        r = active / self.total_cores
+        if len(self.frequencies) == 1:
+            return 0
 
-        freq = self.base_freq + (
-            self.max_freq - self.base_freq
-        ) * (r ** alpha)  # power law scaling
+        index = round(utilization * (len(self.frequencies) - 1))
+        return max(0, min(len(self.frequencies) - 1, index))
 
-        self.current_frequency = max(self.base_freq, min(self.max_freq, freq))
-        return self.current_frequency
-        '''
-    def get_effective_utilization(self) -> float:
-        
-        effective_ops = max(self.used_ops, self.allocated_ops)
 
-        if self.max_cap <= 0:
-            return 0.0
+    def get_current_frequency(self) -> float:
+        """
+        Devuelve la frecuencia actual en Hz.
+        """
 
-        u = effective_ops / self.max_cap
-        return max(0.0, min(1.0, u))
+        index = self.get_frequency_index()
+        return self.frequencies[index]
 
-    def get_frequency(self, alpha: float) -> float:
-        
-        u = self.get_effective_utilization()
 
-        scaled_u = u ** alpha
+    def get_current_voltage(self) -> float:
+        """
+        Devuelve el voltaje asociado a la frecuencia actual.
+        """
 
-        return self.min_frequency + (
-            self.max_frequency - self.min_frequency
-        ) * scaled_u
-'''
+        index = self.get_frequency_index()
+        return self.voltages[index]
+
+
+    def get_current_operating_point(self):
+        """
+        Devuelve el punto de operación actual:
+
+            utilization
+            active_cores
+            frequency
+            voltage
+        """
+
+        utilization = self.get_utilization()
+        active_cores = self.get_active_cores()
+        frequency = self.get_current_frequency()
+        voltage = self.get_current_voltage()
+
+        return utilization, active_cores, frequency, voltage
 
 class BaseStation:
     __slots__ = ["name", "rate", "location", "server", "users"]
