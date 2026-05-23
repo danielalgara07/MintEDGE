@@ -53,7 +53,6 @@ class EdgeServer(EnergyAware):
         "min_frequency",
         "active_cores",
         "current_frequency",
-        "total_cores",
         "frequencies",
         "voltages",
         "activity_factor",
@@ -67,16 +66,13 @@ class EdgeServer(EnergyAware):
             max_cap: int,
             idle_power: int,
             max_power: int,
-            total_cores: int,
-            max_frequency: float,
-            min_frequency: float,
+            activity_factor: float,
+            capacitance: float ,
             boot_time: Optional[int] = None,
-
 
             frequencies: Optional[List[float]] = None,
             voltages: Optional[List[float]] = None,
-            activity_factor: float = 0.5,
-            capacitance: float = 1.0,
+            
         ):
 
         """This class represents an edge server in the infrastructure.
@@ -104,13 +100,11 @@ class EdgeServer(EnergyAware):
         self.boot_time = boot_time
         self.last_onoff_time = 0
         
-        self.total_cores = total_cores
-        self.max_frequency = max_frequency
-        self.min_frequency = min_frequency
+       
         self.active_cores = 0
-        self.current_frequency = min_frequency
-        self.frequencies = frequencies if frequencies is not None else [min_frequency, max_frequency]
-        self.voltages = voltages if voltages is not None else [1.0, 1.0]
+       
+        self.frequencies = frequencies 
+        self.voltages = voltages 
         self.activity_factor = activity_factor
         self.capacitance = capacitance
 
@@ -123,7 +117,6 @@ class EdgeServer(EnergyAware):
             self.energy_model = EnergyModelServerPolynomial(alpha=settings.ALPHA)
         elif settings.SERVER_ENERGY_MODEL == "frequency":
             self.energy_model = EnergyModelServerFrequency()
-            # 
         else:
             raise ValueError("Unknown SERVER_ENERGY_MODEL")
 
@@ -289,21 +282,8 @@ class EdgeServer(EnergyAware):
 
     # Metodos para calculo de energia con DVFS
     #------------------------------------------
-    def get_active_cores(self) -> int:
-        """
-        Estima cuántos cores están activos según la utilización actual.
-        """
 
-        utilization = self.get_utilization()
-
-        if utilization <= 0:
-            return 0
-
-        active_cores = round(utilization * self.total_cores)
-        return max(1, min(self.total_cores, active_cores))
-
-
-    def get_frequency_index(self) -> int:
+    def get_frequency_and_voltage_index(self) -> int:
         """
         Selecciona el índice de frecuencia según la carga actual.
 
@@ -312,9 +292,6 @@ class EdgeServer(EnergyAware):
         """
 
         utilization = self.get_utilization()
-
-        if len(self.frequencies) == 1:
-            return 0
 
         index = round(utilization * (len(self.frequencies) - 1))
         return max(0, min(len(self.frequencies) - 1, index))
@@ -325,7 +302,7 @@ class EdgeServer(EnergyAware):
         Devuelve la frecuencia actual en Hz.
         """
 
-        index = self.get_frequency_index()
+        index = self.get_frequency_and_voltage_index()
         return self.frequencies[index]
 
 
@@ -334,26 +311,12 @@ class EdgeServer(EnergyAware):
         Devuelve el voltaje asociado a la frecuencia actual.
         """
 
-        index = self.get_frequency_index()
+        index = self.get_frequency_and_voltage_index()
         return self.voltages[index]
 
 
-    def get_current_operating_point(self):
-        """
-        Devuelve el punto de operación actual:
 
-            utilization
-            active_cores
-            frequency
-            voltage
-        """
 
-        utilization = self.get_utilization()
-        active_cores = self.get_active_cores()
-        frequency = self.get_current_frequency()
-        voltage = self.get_current_voltage()
-
-        return utilization, active_cores, frequency, voltage
 
 class BaseStation:
     __slots__ = ["name", "rate", "location", "server", "users"]

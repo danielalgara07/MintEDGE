@@ -417,14 +417,11 @@ class Simulation:
                     ser_set["MAX_CAPACITY"],
                     idle_power=ser_set["IDLE_POWER"],
                     max_power=ser_set["MAX_POWER"],
-                    total_cores=ser_set["TOTAL_CORES"],
-                    max_frequency=ser_set["MAX_FREQUENCY"],
-                    min_frequency=ser_set["MIN_FREQUENCY"],
                     boot_time=ser_set["BOOT_TIME"],
                     activity_factor=ser_set["ACTIVITY_FACTOR"],
                     capacitance=ser_set["CAPACITANCE"],
-                    frequencies=ser_set["FREQUENCIES"], # esta gestionado por un diccionario, cambiar
-                    voltages=ser_set["VOLTAGES"], # esta gestionado por un diccionario, cambiar
+                    frequencies=ser_set["FREQUENCIES"], 
+                    voltages=ser_set["VOLTAGES"], 
 
                 )
             )
@@ -580,14 +577,42 @@ class Simulation:
             )
         
         # Comprobar que existen los parametros de modelo de energia y alpha en modelos concretos
-
         if settings.SERVER_ENERGY_MODEL == None or not settings.SERVER_ENERGY_MODEL:
             raise MintEDGESettingsError(
                 "SERVER_ENERGY_MODEL must be set in settings.py"
             )
         
-        modelswhithalpha = ["powerlaw", "polynomial", "frequency"]
+        models=["linear","powerlaw", "polynomial","frecuency"]
+        if settings.SERVER_ENERGY_MODEL not in model
+            raise MintEDGESettingsError(
+                "SERVER_ENERGY_MODEL must be one of this models: " + models
+            )
+
+        modelswhithalpha = ["powerlaw", "polynomial"]
         if settings.SERVER_ENERGY_MODEL in modelswhithalpha and (settings.ALPHA is None or settings.ALPHA <= 0):
             raise MintEDGESettingsError(
                 "ALPHA must be set to a value > 0 for SERVER_ENERGY_MODEL"
             )
+
+        if settings.SERVER_ENERGY_MODEL == "frequency" and
+         (settings.SERVERS[0].CAPACITANCE is None or settings.SERVERS[0].ACTIVITY_FACTOR is Noneor settings.SERVERS[0].FREQUENCIES is None or settings.SERVERS[0].VOLTAGES is None):
+            raise MintEDGESettingsError(
+                "C, A, FREQUENCIES and VOLTAGES must be set for SERVER_ENERGY_MODEL='frequency'"
+            )
+
+        if settings.SERVER_ENERGY_MODEL == "frequency" and (settings.SERVERS[0].CAPACITANCE <= 0 or settings.SERVERS[0].ACTIVITY_FACTOR <= 0):
+            raise MintEDGESettingsError(
+                "C and A must be values > 0 for SERVER_ENERGY_MODEL='frequency'"
+            )
+
+        if settings.SERVER_ENERGY_MODEL == "frequency" and (len(settings.SERVERS[0].FREQUENCIES) < 3 or len(settings.SERVERS[0].VOLTAGES) < 3):
+            raise MintEDGESettingsError(
+                "FREQUENCIES and VOLTAGES must have at least 3 values for SERVER_ENERGY_MODEL='frequency'"
+            )
+
+        if settings.SERVER_ENERGY_MODEL == "frequency" and (len(settings.SERVERS[0].FREQUENCIES) != len(settings.SERVERS[0].VOLTAGES)):
+            raise MintEDGESettingsError(
+                "FREQUENCIES and VOLTAGES must have the same length for SERVER_ENERGY_MODEL='frequency'"
+            )
+
+        

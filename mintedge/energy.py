@@ -110,11 +110,11 @@ class EnergyModelServer(EnergyModel):
 
     def measure(self) -> EnergyMeasurement:
         if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
-            return EnergyMeasurement(
-                dynamic=self.server.max_power, idle=self.server.idle_power
-            )
+            return EnergyMeasurement(dynamic=self.server.max_power, idle=self.server.idle_power)
+
         if not self.server.is_on:
             return EnergyMeasurement(dynamic=0, idle=0)
+
         dynamic_power = ((self.server.max_power - self.server.idle_power) / self.server.max_cap ) * self.server.used_ops
         return EnergyMeasurement(dynamic=dynamic_power, idle=self.server.idle_power)
 
@@ -144,24 +144,16 @@ class EnergyModelServerPowerLaw(EnergyModel):
         
     def measure(self) -> EnergyMeasurement:
         if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
-            return EnergyMeasurement(dynamic=self.server.max_power,idle=self.server.idle_power)
+            return EnergyMeasurement(dynamic=self.server.max_power, idle=self.server.idle_power)
 
         # si está apagado no consume
         if not self.server.is_on:
-            return EnergyMeasurement(dynamic=0, idle=0)
-        
-        # Validación para evitar división por cero y valores de utilización no válidos
-        if self.server.max_cap <= 0:
-            raise ValueError("server.max_cap must be > 0")
+            return EnergyMeasurement(dynamic = 0, idle = 0)
 
-        # U entre 0 y 1 
-        utilization = self.server.used_ops / self.server.max_cap
-        utilization = max(0.0, min(1.0, utilization))  # bueno añadirlo
-
+        utilization = self.server.get_utilization()
         dynamic_power = (self.server.max_power - self.server.idle_power) * (utilization ** self.alpha)
 
-        return EnergyMeasurement(dynamic=dynamic_power,idle=self.server.idle_power)
-    
+        return EnergyMeasurement(dynamic = dynamic_power, idle = self.server.idle_power)
 
     def set_parent(self, parent):
         self.server = parent
@@ -188,30 +180,17 @@ class EnergyModelServerPolynomial(EnergyModel):
     def measure(self) -> EnergyMeasurement:
         # Durante boot consumo máximo
         if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
-            return EnergyMeasurement(
-                dynamic=self.server.max_power,
-                idle=self.server.idle_power,
-            )
+            return EnergyMeasurement(dynamic= self.server.max_power,idle= self.server.idle_power)
 
         # Si está apagado no consume
         if not self.server.is_on:
-            return EnergyMeasurement(dynamic=0, idle=0)
-
-        # Validación para evitar división por cero y valores de utilización no válidos
-        if self.server.max_cap <= 0:
-            raise ValueError("server.max_cap must be > 0")
-
-        # Utilización entre 0 y 1 
-        utilization  = self.server.used_ops / self.server.max_cap
-        utilization = max(0.0, min(1.0, utilization))
+            return EnergyMeasurement(dynamic= 0, idle= 0)
 
         # Modelo polinómico con alpha
+        utilization  = self.server.get_utilization()
         dynamic_power = ( self.server.max_power - self.server.idle_power ) * (2 * utilization - (utilization ** self.alpha))
 
-        return EnergyMeasurement(
-            dynamic=dynamic_power,
-            idle=self.server.idle_power,
-        )
+        return EnergyMeasurement(dynamic= dynamic_power,idle= self.server.idle_power)
 
     def set_parent(self, parent):
         self.server = parent
@@ -237,46 +216,23 @@ class EnergyModelServerFrequency(EnergyModel):
         self.server = parent
 
     def measure(self) -> EnergyMeasurement:
-        """
-        Calcula la potencia consumida por el servidor en el instante actual.
-        """
-
+        
         # Durante el arranque mantenemos un consumo alto
         if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
-            return EnergyMeasurement(
-                dynamic=self.server.max_power - self.server.idle_power,
-                idle=self.server.idle_power,
-            )
+            return EnergyMeasurement(dynamic= self.server.max_power, idle= self.server.idle_power)
 
         # Si el servidor está apagado, no consume
         if not self.server.is_on:
-            return EnergyMeasurement(dynamic=0, idle=0)
+            return EnergyMeasurement(dynamic= 0, idle= 0)
 
-        utilization, active_cores, frequency, voltage = (
-            self.server.get_current_operating_point()
-        )
+        utilization = self.server.get_utilization()
+        frequency = self.server.get_current_frequency()
+        voltage = self.server.get_current_voltage()
 
-        # Sin carga: solo potencia idle.
-        if active_cores == 0:
-            return EnergyMeasurement(dynamic=0, idle=self.server.idle_power)
+        # P = A * C * V^2 * f
+        dynamic_power = (self.server.activity_factor * self.server.capacitance* (voltage ** 2)* frequency)
 
-        # Fórmula dinámica:
-        # Pdynamic = A * C * V^2 * f
-        dynamic_power = (
-            self.server.activity_factor
-            * self.server.capacitance
-            * (voltage ** 2)
-            * frequency
-        )
-
-        # Ajuste por cores activos.
-        dynamic_power *= active_cores / self.server.total_cores
-
-        # Seguridad: no dejamos que supere la potencia dinámica máxima del servidor.
-        max_dynamic_power = self.server.max_power - self.server.idle_power
-        dynamic_power = min(dynamic_power, max_dynamic_power)
-
-        return EnergyMeasurement(dynamic=dynamic_power, idle=self.server.idle_power)
+        return EnergyMeasurement(dynamic= dynamic_power, idle= self.server.idle_power)
     
 
 

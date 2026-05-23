@@ -50,18 +50,16 @@ ROUTES_FILE = "./scenario/Luxembourg.rou.xml"
 
 # The number of cars, pedestrians and stationary users is only considered if
 # RANDOM_ROUTES is True
-NUMBER_OF_CARS = 2500
-NUMBER_OF_PEOPLE = 500 
+NUMBER_OF_CARS = 5000
+NUMBER_OF_PEOPLE = 9000 
 NUMBER_OF_STATIONARY = 100
 
 # The user count distribution expresses the share of active users over the total
 # for each hour of the day. You can combine this with RANDOM_ROUTES to generate
 # dynamic user counts.
 # fmt: off
-USER_COUNT_DISTRIBUTION = [0.13, 0.1, 0.07, 0.04, 0.03, 0.02, 0.02, 0.03, 0.04, 0.06, 0.08, 0.09, 0.1, 0.1, 0.11, 0.12, 0.12, 0.12, 0.13, 0.14, 0.15, 0.16, 0.16, 0.15, 0.13]
+USER_COUNT_DISTRIBUTION = [0.1, 0.4, 0.07, 0.04, 0.03, 0.02, 0.02, 0.03, 0.04, 0.06, 0.08, 0.09, 0.1, 0.1, 0.11, 0.12, 0.12, 0.12, 0.13, 0.14, 0.15, 0.16, 0.16, 0.15, 0.13]
 # fmt: on
-
-# USER_COUNT_DISTRIBUTION = [0.05, 0.2, 0.07, 0.04, 0.03, 0.02, 0.02, 0.03, 0.04, 0.06, 0.08, 0.09, 0.1, 0.1, 0.11, 0.12, 0.12, 0.12, 0.13, 0.14, 0.15, 0.16, 0.16, 0.15, 0.13]
 
 """BASE STATION"""
 BS_BANDWIDTH = 100e6  # 100 MHz (METIS-II Table 3-9 UC5 (connected cars))
@@ -97,18 +95,10 @@ SERVERS = [
         "MAX_CAPACITY": 11260532,
         "BOOT_TIME": 20,
 
-        "MAX_FREQUENCY": 3.8e9,
-        "MIN_FREQUENCY": 2.0e9,
-        "TOTAL_CORES": 56,
-        
-        "FREQUENCY_POWER_STATES": [
-            {"FREQUENCY": 2.0e9, "POWER": 222},
-            {"FREQUENCY": 2.4e9, "POWER": 300},
-            {"FREQUENCY": 2.8e9, "POWER": 410},
-            {"FREQUENCY": 3.2e9, "POWER": 560},
-            {"FREQUENCY": 3.8e9, "POWER": 696},
-        ],
-
+        "CAPACITANCE": 1e-9,  
+        "ACTIVITY_FACTOR": 0.2,
+        "FREQUENCIES": [2.0e9, 2.4e9, 2.8e9, 3.2e9, 3.8e9],
+        "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4], 
         
     },
     # {  # FUJITSU Server PRIMERGY CX2560 M7 PRIMERGY CX400 M6
@@ -145,12 +135,10 @@ SERVICES = [
 # linear model: P = P_idle + (P_max - P_idle) * (used_capacity / max_capacity)
 # power law model: P = P_idle + (P_max - P_idle) * (used_capacity / max_capacity) ** alpha
 # polynomial model: P = P_idle + (P_max - P_idle) * (a * (used_capacity / max_capacity) ** 2 + b * (used_capacity / max_capacity) + c)
-# frequency-based model: P = P_idle + (P_max - P_idle) * (f / f_max) ** 3 
-#                        - if alpha < 1, the frequency increases faster at lower utilizations, which can save energy when the load is low
-#                        - if alpha > 1, the frequency increases faster at higher utilizations, which can save energy when the load is high
+# frequency-based model: P = P_idle + A * C * V^2 * f, where A is the activity factor, C is the capacitance, V is the voltage and f is the frequency. In this case, we can model the power consumption as a function of the frequency, which is a common approach in DVFS (Dynamic Voltage and Frequency Scaling) techniques.
 
 
-# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha), "frequency"(pasarle alpha)
+# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha), "frequency"
 
-SERVER_ENERGY_MODEL = "linear"
+SERVER_ENERGY_MODEL = "frequency"
 ALPHA = 1
