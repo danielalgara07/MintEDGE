@@ -80,10 +80,45 @@ def main(csv_path):
         ax.set_title("Evolución de la utilización media de los servidores")
         ax.grid()
 
+    def grafica_consumo_sin_arranque():
+        ax.clear()
+
+        df_zoom = df[df["time"] > 30]
+
+        ax.plot(df_zoom["time"], df_zoom["dynamic_W_servers"], label="Dinámico servidores")
+        ax.plot(df_zoom["time"], df_zoom["idle_W_servers"], label="Reposo servidores")
+        ax.plot(df_zoom["time"], df_zoom["W_links"], label="Enlaces")
+        ax.plot(df_zoom["time"], df_zoom["energia_total"], label="Total", linewidth=2)
+
+        ax.set_xlabel("Tiempo (s)")
+        ax.set_ylabel("Potencia (W)")
+        ax.set_title("Consumo energético sin fase de arranque")
+        ax.legend()
+        ax.grid()
+
+    def grafica_consumo_solo_dinamico():
+        ax.clear()
+
+        ax.plot(
+            df["time"],
+            df["dynamic_W_servers"],
+            label="Consumo dinámico servidores",
+            linewidth=2
+        )
+
+        ax.set_xlabel("Tiempo (s)")
+        ax.set_ylabel("Potencia dinámica (W)")
+        ax.set_title("Consumo dinámico de los servidores sin enlaces")
+        ax.legend()
+        ax.grid()
+            
     graficas = [
         grafica_consumo,
-        grafica_utilizacion
+        grafica_utilizacion,
+        grafica_consumo_sin_arranque,
+        grafica_consumo_solo_dinamico
     ]
+    
 
     def siguiente(event):
         indice[0] = (indice[0] + 1) % len(graficas)

@@ -202,6 +202,7 @@ class EdgeServer(EnergyAware):
             src (BaseStation): Base station that is requesting the service.
             serv (Service): Service that is being requested.
         """
+        
         if ops + self.used_ops > self.max_cap:
             raise ValueError(
                 f"Cannot use {ops} ops on server {self.name}. Only {self.max_cap - self.used_ops} are available"
@@ -278,23 +279,30 @@ class EdgeServer(EnergyAware):
             raise MintEDGEInfrastructureError(
                 f"Cannot allocate {math.floor(req * a.workload)} requests on server {self.name} for {src.name},{a.name}."
             )
-     
+       
 
     # Metodos para calculo de energia con DVFS
     #------------------------------------------
 
     def get_frequency_and_voltage_index(self) -> int:
         """
-        Selecciona el índice de frecuencia según la carga actual.
+        Selecciona el índice de frecuencia según la utilización real del servidor.
 
-        utilization = 0.0 -> primera frecuencia
-        utilization = 1.0 -> última frecuencia
+        load = 0.0 -> primera frecuencia
+        load > 0.0 -> sube al menos al primer p-state activo
+        load = 1.0 -> última frecuencia
         """
 
-        utilization = self.get_utilization()
+        load = self.get_utilization()
 
-        index = round(utilization * (len(self.frequencies) - 1))
-        return max(0, min(len(self.frequencies) - 1, index))
+        if load <= 0:
+            return 0
+
+        n = len(self.frequencies)
+
+        index = math.ceil(load * (n - 1))
+
+        return max(0, min(n - 1, index))
 
 
     def get_current_frequency(self) -> float:
@@ -313,7 +321,6 @@ class EdgeServer(EnergyAware):
 
         index = self.get_frequency_and_voltage_index()
         return self.voltages[index]
-
 
 
 

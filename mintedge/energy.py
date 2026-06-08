@@ -208,7 +208,7 @@ class EnergyModelServerFrequency(EnergyModel):
             P = C0 + A * C * V^2 * f
 
         C0 se toma como idle_power del servidor.
-        A, C, V y f están almacenados o calculados en EdgeServer.
+        
         """
         pass
 
@@ -216,23 +216,28 @@ class EnergyModelServerFrequency(EnergyModel):
         self.server = parent
 
     def measure(self) -> EnergyMeasurement:
-        
-        # Durante el arranque mantenemos un consumo alto
+
         if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
-            return EnergyMeasurement(dynamic= self.server.max_power, idle= self.server.idle_power)
+            return EnergyMeasurement(
+                dynamic=max(0, self.server.max_power - self.server.idle_power),
+                idle=self.server.idle_power,
+            )
 
-        # Si el servidor está apagado, no consume
         if not self.server.is_on:
-            return EnergyMeasurement(dynamic= 0, idle= 0)
+            return EnergyMeasurement(dynamic=0, idle=0)
 
-        utilization = self.server.get_utilization()
         frequency = self.server.get_current_frequency()
         voltage = self.server.get_current_voltage()
 
-        # P = A * C * V^2 * f
-        dynamic_power = (self.server.activity_factor * self.server.capacitance* (voltage ** 2)* frequency)
+        # P_dynamic = A * C * V^2 * f
+        dynamic_power = (
+            self.server.activity_factor
+            * self.server.capacitance
+            * (voltage ** 2)
+            * frequency
+        )
 
-        return EnergyMeasurement(dynamic= dynamic_power, idle= self.server.idle_power)
+        return EnergyMeasurement(dynamic=dynamic_power, idle=self.server.idle_power)
     
 
 

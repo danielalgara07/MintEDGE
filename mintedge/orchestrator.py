@@ -86,7 +86,7 @@ class Orchestrator:
 
         # Run orchestrator process
         while True:
-            new_demand_mat = self._get_current_demand_matrix()
+            new_demand_mat = self._get_current_demand_matrix()  
             self.demand_mat = new_demand_mat  # Update lmbda matrix
 
             # Update allocation matrixes

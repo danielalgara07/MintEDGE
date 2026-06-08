@@ -85,9 +85,10 @@ class AllocationStrategy:
 
             # Requests to route this iteration
             req_to_locate = demand_matrix[src.name][serv.name]
-
+        
             # Get servers that can attend the requests within the constraints
             cand = self._get_cand_servers(server_status, src, serv)
+            
             # Reroute requests
             assig_matrix, req_to_locate, used_cap, _ = self._route(
                 cand,
