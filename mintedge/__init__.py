@@ -8,7 +8,7 @@ from .energy import (
     EnergyModelServer,
     EnergyModelLink,
     EnergyModelServerPowerLaw,
-    EnergyModelServerPolynomial,
+    EnergyModelServerEmpirical,
     EnergyModelServerFrequency,
 
 )

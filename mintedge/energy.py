@@ -159,10 +159,10 @@ class EnergyModelServerPowerLaw(EnergyModel):
         self.server = parent
     
 
-#--------------------Modelo potencia de servidor 2 (polynomial)----------------
+#--------------------Modelo potencia de servidor 2 (empirical)----------------
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
-class EnergyModelServerPolynomial(EnergyModel):
+class EnergyModelServerEmpirical(EnergyModel):
     def __init__(self, alpha: float):
         """
         Energy model:

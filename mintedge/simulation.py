@@ -582,13 +582,13 @@ class Simulation:
                 "SERVER_ENERGY_MODEL must be set in settings.py"
             )
         
-        models=["linear","powerlaw", "polynomial","frequency"]
+        models = ["linear","powerlaw","empirical","frequency"]
         if settings.SERVER_ENERGY_MODEL not in models:
             raise MintEDGESettingsError(
                 "SERVER_ENERGY_MODEL must be one of this models: " + ", ".join(models)
             )
 
-        modelswhithalpha = ["powerlaw", "polynomial"]
+        modelswhithalpha = ["powerlaw","empirical"]
         if settings.SERVER_ENERGY_MODEL in modelswhithalpha and (settings.ALPHA is None or settings.ALPHA <= 0):
             raise MintEDGESettingsError(
                 "ALPHA must be set to a value > 0 for SERVER_ENERGY_MODEL"

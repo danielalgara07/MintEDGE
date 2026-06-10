@@ -16,7 +16,7 @@ from mintedge import (
     EnergyModelLink,
     EnergyModelServer,
     EnergyModelServerPowerLaw, 
-    EnergyModelServerPolynomial,
+    EnergyModelServerEmpirical,
     EnergyModelServerFrequency,
     Location,
     Service,
@@ -113,8 +113,8 @@ class EdgeServer(EnergyAware):
             self.energy_model = EnergyModelServer()
         elif settings.SERVER_ENERGY_MODEL == "powerlaw":
             self.energy_model = EnergyModelServerPowerLaw(alpha=settings.ALPHA)
-        elif settings.SERVER_ENERGY_MODEL == "polynomial":
-            self.energy_model = EnergyModelServerPolynomial(alpha=settings.ALPHA)
+        elif settings.SERVER_ENERGY_MODEL == "empirical":
+            self.energy_model = EnergyModelServerEmpirical(alpha=settings.ALPHA)
         elif settings.SERVER_ENERGY_MODEL == "frequency":
             self.energy_model = EnergyModelServerFrequency()
         else:

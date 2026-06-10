@@ -153,11 +153,11 @@ SERVICES = [
 #------------------------------------------------------------
 # linear model: P = P_idle + (P_max - P_idle) * utilization
 # power law model: P = P_idle + (P_max - P_idle) * utilization ** alpha
-# empirical model: P = P_idle + (P_max - P_idle) * (2 * utilization - utilization ** alpha) 
+# empirical model: P = P_idle + (P_max - P_idle) * (2 * utilization - utilization ** alpha) --> (alpha == r ) --> r suele ser 1.4
 # frequency model: P = P_idle + A * C * V^2 * f -- > DSFV
 
-#                                                        "empirical"
-# modelos posibles: "linear", "powerlaw"(pasarle alpha), "polynomial"(pasarle alpha), "frequency"
+                                                     
+# modelos posibles: "linear", "powerlaw"(pasarle alpha), "empirical"(pasarle alpha), "frequency"
 
-SERVER_ENERGY_MODEL = "linear"
+SERVER_ENERGY_MODEL = "empirical"
 ALPHA = 2.0
