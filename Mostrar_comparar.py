@@ -426,48 +426,6 @@ def main(csv_path_1, csv_path_2, label1, label2, tiempo_sin_arranque, summary_ou
         ax.grid()
 
 
-    def grafica_porcentajes():
-        ax.clear()
-
-        metricas = [
-            ("Pot. dinámica media", "potencia_dinamica_media_W"),
-            ("Energía dinámica", "energia_dinamica_Wh"),
-            ("Pico dinámico", "potencia_dinamica_max_W"),
-            ("Energía/request", "energia_dinamica_por_request_J"),
-            ("Tasa rechazo", "tasa_rechazo_global_pct"),
-            ("Retardo CV", "retardo_medio_cv"),
-            ("Retardo AR", "retardo_medio_ar"),
-            ("Retardo VA", "retardo_medio_va"),
-        ]
-
-        nombres = []
-        porcentajes = []
-
-        for nombre, key in metricas:
-            v1 = resumen1[key]
-            v2 = resumen2[key]
-
-            if pd.isna(v1) or pd.isna(v2) or v1 == 0:
-                continue
-
-            pct = ((v2 - v1) / v1) * 100
-
-            nombres.append(nombre)
-            porcentajes.append(pct)
-
-        ax.bar(nombres, porcentajes)
-
-        ax.axhline(0, linewidth=1)
-
-        ax.set_ylabel(f"Diferencia porcentual de {label2} respecto a {label1} (%)")
-        ax.set_title(
-            "Porcentajes comparativos\n"
-            f"Valor negativo = {label2} es menor/mejor que {label1}"
-        )
-
-        ax.tick_params(axis="x", rotation=30)
-        ax.grid(axis="y")
-
     def grafica_resumen_texto():
         ax.clear()
         ax.axis("off")
@@ -522,7 +480,6 @@ def main(csv_path_1, csv_path_2, label1, label2, tiempo_sin_arranque, summary_ou
         grafica_consumo_dinamico_sin_arranque,
         grafica_utilizacion,
         grafica_tasa_rechazo,
-        grafica_porcentajes,
         grafica_resumen_texto,
     ]
 
