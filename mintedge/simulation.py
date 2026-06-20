@@ -604,11 +604,6 @@ class Simulation:
                 "C and A must be values > 0 for SERVER_ENERGY_MODEL='frequency'"
             )
 
-        if settings.SERVER_ENERGY_MODEL == "frequency" and (len(settings.SERVERS[0]["FREQUENCIES"]) < 3 or len(settings.SERVERS[0]["VOLTAGES"]) < 3):
-            raise MintEDGESettingsError(
-                "FREQUENCIES and VOLTAGES must have at least 3 values for SERVER_ENERGY_MODEL='frequency'"
-            )
-
         if settings.SERVER_ENERGY_MODEL == "frequency" and (len(settings.SERVERS[0]["FREQUENCIES"]) != len(settings.SERVERS[0]["VOLTAGES"])):
             raise MintEDGESettingsError(
                 "FREQUENCIES and VOLTAGES must have the same length for SERVER_ENERGY_MODEL='frequency'"

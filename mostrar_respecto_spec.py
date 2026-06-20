@@ -787,11 +787,12 @@ def crear_graficas(
     multiplicador_spec_servidores: float,
     max_anotaciones_eventos: int,
     variacion_muestra_spec: float,
+    salto_puntos_modelo_temporal: int = 1,
     save_fig: Optional[str] = None,
 ):
     fig, ax = plt.subplots(figsize=(15, 8.5))
     fig.canvas.manager.set_window_title("Comparación MintEDGE respecto a SPEC")
-
+    salto_puntos_modelo_temporal = max(1, int(salto_puntos_modelo_temporal))
     # Se deja más espacio abajo para:
     # - leyenda explicativa
     # - leyenda normal
@@ -921,6 +922,9 @@ def crear_graficas(
         spec_label_usado = False
         punto_label_usado = False
 
+        primer_modelo = next(iter(modelos.keys()))
+        color_spec = "black"        
+
         for modelo, df in modelos.items():
             temporal = obtener_spec_esperado_temporal(
                 df,
@@ -929,11 +933,27 @@ def crear_graficas(
             )
 
             # Potencia real de MintEDGE
+            temporal_mintedge_plot = (
+                temporal[["time", "power_W"]]
+                .dropna()
+                .sort_values("time")
+                .iloc[::salto_puntos_modelo_temporal]
+                .copy()
+            )
+
+            if salto_puntos_modelo_temporal > 1:
+                label_mintedge = (
+                    f"{modelo} - potencia MintEDGE "
+                    f"(1 de cada {salto_puntos_modelo_temporal} puntos)"
+                )
+            else:
+                label_mintedge = f"{modelo} - potencia MintEDGE"
+
             ax.plot(
-                temporal["time"],
-                temporal["power_W"],
+                temporal_mintedge_plot["time"],
+                temporal_mintedge_plot["power_W"],
                 linewidth=1.7,
-                label=f"{modelo} - potencia MintEDGE",
+                label=label_mintedge,
             )
 
             # Puntos SPEC exactos: solo 0, 10, 20, ..., 100
@@ -944,7 +964,7 @@ def crear_graficas(
                 .copy()
             )
 
-            if not serie_spec.empty:
+            if modelo == primer_modelo and not serie_spec.empty:
                 ax.plot(
                     serie_spec["time"],
                     serie_spec["spec_esperado_temporal_W"],
@@ -952,12 +972,8 @@ def crear_graficas(
                     linewidth=2,
                     marker="o",
                     markersize=4,
-                    color="tab:orange",
-                    label=(
-                        "SPEC esperado con tolerancia"
-                        if not spec_label_usado
-                        else "_nolegend_"
-                    ),
+                    color=color_spec,
+                    label="SPEC esperado con tolerancia",
                 )
 
                 spec_label_usado = True
@@ -971,7 +987,7 @@ def crear_graficas(
                 incluir_primer_punto=True,
             )
 
-            if not eventos.empty:
+            if modelo == primer_modelo and not eventos.empty:
                 eventos_a_mostrar = eventos.head(max_anotaciones_eventos)
 
                 ax.scatter(
@@ -979,19 +995,13 @@ def crear_graficas(
                     eventos_a_mostrar["spec_esperado_temporal_W"],
                     s=45,
                     marker="o",
-                    color="tab:orange",
+                    color=color_spec,
                     zorder=5,
-                    label=(
-                        "Punto SPEC etiquetado"
-                        if not punto_label_usado
-                        else "_nolegend_"
-                    ),
+                    label="Punto SPEC etiquetado",
                 )
 
                 punto_label_usado = True
 
-                # Importante:
-                # Primero se actualizan los límites de la gráfica y luego se anotan.
                 ax.relim()
                 ax.autoscale_view()
 
@@ -1019,14 +1029,14 @@ def crear_graficas(
         texto_leyenda = (
             "Leyenda:\n"
             "• Línea MintEDGE: potencia calculada por la simulación.\n"
-            "• Línea/puntos naranjas: valor SPEC esperado.\n"
+            "• Línea/puntos negros: valor SPEC esperado.\n"
             f"• Se pinta si la utilización está a ±{variacion_muestra_spec:g}% de un nivel SPEC.\n"
             "• Los niveles SPEC son 0%, 10%, 20%, ..., 100%.\n"
             "• En 0% no baja de 0%; en 100% no pasa de 100%."
         )
 
         texto_leyenda_fig = fig.text(
-            0.08,
+            0.02,
             0.035,
             texto_leyenda,
             ha="left",
@@ -1283,6 +1293,7 @@ def main(
     summary_output: Optional[str],
     save_fig: Optional[str],
     variacion_muestra_spec: float,
+    salto_puntos_modelo_temporal: int,
 ):
     if labels is None or len(labels) == 0:
         labels = [os.path.splitext(os.path.basename(p))[0] for p in input_paths]
@@ -1351,6 +1362,7 @@ def main(
         multiplicador_spec_servidores=multiplicador_spec_servidores,
         max_anotaciones_eventos=max_anotaciones_eventos,
         variacion_muestra_spec=variacion_muestra_spec,
+        salto_puntos_modelo_temporal=salto_puntos_modelo_temporal,
         save_fig=save_fig,
     )
 
@@ -1492,6 +1504,17 @@ if __name__ == "__main__":
         ),
     )
 
+    parser.add_argument(
+        "--salto-puntos-modelo-temporal",
+        type=int,
+        default=1,
+        help=(
+            "Salto de puntos para pintar la potencia MintEDGE en la gráfica temporal. "
+            "Por ejemplo, 5 pinta 1 de cada 5 puntos de MintEDGE. "
+            "No afecta al cálculo ni al pintado de SPEC. Por defecto: 1"
+        ),
+    )
+
     args = parser.parse_args()
 
     main(
@@ -1509,6 +1532,7 @@ if __name__ == "__main__":
         multiplicador_spec_servidores=args.servidores_conectados,
         max_anotaciones_eventos=args.max_anotaciones_eventos,
         variacion_muestra_spec=args.variacion_muestra_spec,
+        salto_puntos_modelo_temporal=args.salto_puntos_modelo_temporal,
         summary_output=args.summary_output,
         save_fig=args.save_fig,
     )
