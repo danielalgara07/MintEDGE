@@ -50,16 +50,16 @@ ROUTES_FILE = "./scenario/Luxembourg.rou.xml"
 
 # The number of cars, pedestrians and stationary users is only considered if
 # RANDOM_ROUTES is True
-NUMBER_OF_CARS = 20
-NUMBER_OF_PEOPLE = 10
-NUMBER_OF_STATIONARY = 15
+NUMBER_OF_CARS = 2500
+NUMBER_OF_PEOPLE = 1000
+NUMBER_OF_STATIONARY = 500
 
 
 # The user count distribution expresses the share of active users over the total
 # for each hour of the day. You can combine this with RANDOM_ROUTES to generate
 # dynamic user counts.
 # fmt: off
-USER_COUNT_DISTRIBUTION = [0.2, 0.4, 0.6, 0.5, 0.1, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 0.8, 0.5, 0.6, 0.7, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 0.4, 0.2, 0.1, 0.02]
+USER_COUNT_DISTRIBUTION = [0.3, 0.4, 0.6, 0.5, 0.1, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99, 0.8, 0.5, 0.6, 0.7, 0.5, 0.6, 0.6, 0.7, 0.7, 0.8, 0.4, 0.2, 0.1, 0.02]
 # fmt: on
 
 """BASE STATION"""
@@ -99,11 +99,48 @@ SERVERS = [
     #    "MAX_CAPACITY": 11260532,
     #    "BOOT_TIME": 20,
 
+    #    "SPEC_POWER_CURVE": [
+    #        (0, 222),
+    #        (10, 293),
+    #        (20, 327),
+    #        (30, 361),
+    #        (40, 393),
+    #        (50, 426),
+    #        (60, 462),
+    #        (70, 503),
+    #        (80, 551),
+    #        (90, 619),
+    #        (100, 696),
+    #    ],
     #    "CAPACITANCE": 318e-9,  # creado a partir de la fórmula P = P_idle + A * C * V^2 * f, con p_idle=222,P_max=696, A=0.2, V=1.4 y f=3,8e9
     #    "ACTIVITY_FACTOR": 0.2,  # creado a partir de la fórmula P = P_idle + A * C * V^2 * f, con P_idle=222, P_max=696, C=318e-9, V=1.4 y f=3.8e9
     #    "FREQUENCIES": [2.0e9, 2.4e9, 2.8e9, 3.2e9, 3.8e9],  # inventado, menos el primer valor que es el base clock y el último que es el turbo clock
     #    "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
     #},
+
+    { # ASUSTeK RS720A-E13-RS8U - AMD EPYC 9965, 2 chips, 384 cores total
+        "MAX_POWER": 800,
+        "IDLE_POWER": 150,
+        "MAX_CAPACITY": 39140079,  # SPECpower_ssj2008 ssj_ops @ 100%
+        "BOOT_TIME": 20,
+        "SPEC_POWER_CURVE": [
+            (0, 150),
+            (10, 265),
+            (20, 315),
+            (30, 362),
+            (40, 413),
+            (50, 462),
+            (60, 504),
+            (70, 546),
+            (80, 589),
+            (90, 680),
+            (100, 800),
+        ],
+        "ACTIVITY_FACTOR": 1.0,
+        "CAPACITANCE": None,
+        "FREQUENCIES": [1.5e9, 2.0e9, 2.5e9, 3.0e9],  # inventado´
+        "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
+    },
 
     #{  # Supermicro SuperWorkstation 5039A-i Intel Xeon W-2123 
     #    "MAX_POWER": 28.21,
@@ -166,21 +203,21 @@ SERVERS = [
         #"VOLTAGES": [1.2375, 1.1375, 1.0375, 0.9375],
     #   },
 
-    {  # HP ProLiant DL385 G6 AMD Opteron 2435, 2 chips, 12 cores total
-        "MAX_POWER": 260,
-        "IDLE_POWER": 124,
-        "MAX_CAPACITY": 535814,  # SPECpower_ssj2008: ssj_ops@100% = 535,814
-        "BOOT_TIME": 20,
+    #{  # HP ProLiant DL385 G6 AMD Opteron 2435, 2 chips, 12 cores total
+    #    "MAX_POWER": 260,
+    #    "IDLE_POWER": 124,
+    #    "MAX_CAPACITY": 535814,  # SPECpower_ssj2008: ssj_ops@100% = 535,814
+    #    "BOOT_TIME": 20,
 
-        "CAPACITANCE": 24e-9,  # no encontrado x1-->18.55e-9
-        "ACTIVITY_FACTOR": 1,
-        "FREQUENCIES": [0.8e9, 1.4e9, 1.7e9, 2.1e9, 2.6e9],
+    #    "CAPACITANCE": 24e-9,  # no encontrado x1-->18.55e-9
+    #    "ACTIVITY_FACTOR": 1,
+    #    "FREQUENCIES": [0.8e9, 1.4e9, 1.7e9, 2.1e9, 2.6e9],
         # AMD da rangos
         # P0: 1.075-1.300 V, P1: 1.025-1.250 V,
         # P2: 1.000-1.225 V, P3: 0.975-1.200 V,
         # P4: 0.900-1.125 V
-        "VOLTAGES": [1.125, 1.2, 1.225, 1.250, 1.3],
-    },
+    #    "VOLTAGES": [1.125, 1.2, 1.225, 1.250, 1.3],
+    #},
     #----------------------------------------------------------------------------------------
     #----------------------------------------------------------------------------------------
 
@@ -232,9 +269,9 @@ SERVICES = [
 # power law model: P = P_idle + (P_max - P_idle) * utilization ** alpha
 # empirical model: P = P_idle + (P_max - P_idle) * (2 * utilization - utilization ** alpha) --> (alpha == r ) --> r suele ser 1.4
 # frequency model: P = P_idle + A * C * V^2 * f -- > DSFV
+# spec_linear_interpolation: P = f(utilization) =  --> f is a piecewise linear function defined by the SPECpower_ssj2008 measurements at different utilization levels
 
-                                                     
-# modelos posibles: "linear", "powerlaw"(pasarle alpha), "empirical"(pasarle alpha), "frequency"
-
-SERVER_ENERGY_MODEL = "frequency"
+# Alpha i s a parameter of calibration for the power law and empirical models.                                                     
+# modelos posibles: "linear", "powerlaw"(pasarle alpha), "empirical"(pasarle alpha), "frequency" , "spec_linear_interpolation" 
+SERVER_ENERGY_MODEL = "spec_linear_interpolation"
 ALPHA = 1.4

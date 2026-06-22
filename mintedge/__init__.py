@@ -10,6 +10,7 @@ from .energy import (
     EnergyModelServerPowerLaw,
     EnergyModelServerEmpirical,
     EnergyModelServerFrequency,
+    EnergyModelServerSpecLinearInterpolation,
 
 )
 from .infrastructure import Infrastructure, EdgeServer, BaseStation, Link

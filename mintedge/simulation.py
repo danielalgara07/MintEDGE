@@ -418,11 +418,11 @@ class Simulation:
                     idle_power=ser_set["IDLE_POWER"],
                     max_power=ser_set["MAX_POWER"],
                     boot_time=ser_set["BOOT_TIME"],
-                    activity_factor=ser_set["ACTIVITY_FACTOR"],
-                    capacitance=ser_set["CAPACITANCE"],
-                    frequencies=ser_set["FREQUENCIES"], 
-                    voltages=ser_set["VOLTAGES"], 
-
+                    activity_factor=ser_set.get("ACTIVITY_FACTOR", 1),
+                    capacitance=ser_set.get("CAPACITANCE", None),
+                    frequencies=ser_set.get("FREQUENCIES", None),
+                    voltages=ser_set.get("VOLTAGES", None),
+                    spec_power_curve=ser_set.get("SPEC_POWER_CURVE", None),
                 )
             )
 
@@ -582,7 +582,7 @@ class Simulation:
                 "SERVER_ENERGY_MODEL must be set in settings.py"
             )
         
-        models = ["linear","powerlaw","empirical","frequency"]
+        models = ["linear","powerlaw","empirical","frequency","spec_linear_interpolation"]
         if settings.SERVER_ENERGY_MODEL not in models:
             raise MintEDGESettingsError(
                 "SERVER_ENERGY_MODEL must be one of this models: " + ", ".join(models)
@@ -608,5 +608,91 @@ class Simulation:
             raise MintEDGESettingsError(
                 "FREQUENCIES and VOLTAGES must have the same length for SERVER_ENERGY_MODEL='frequency'"
             )
+
+        # Validation for SPECpower-based linear interpolation model
+        if settings.SERVER_ENERGY_MODEL == "spec_linear_interpolation":
+
+            for i, server in enumerate(settings.SERVERS):
+
+                # Check that SPEC_POWER_CURVE exists
+                if "SPEC_POWER_CURVE" not in server:
+                    raise MintEDGESettingsError(
+                        f"SPEC_POWER_CURVE must be set in settings.SERVERS[{i}] "
+                        "for SERVER_ENERGY_MODEL='spec_linear_interpolation'"
+                    )
+
+                curve = server["SPEC_POWER_CURVE"]
+
+                # Check that the curve is not empty
+                if curve is None or len(curve) == 0:
+                    raise MintEDGESettingsError(
+                        f"SPEC_POWER_CURVE in settings.SERVERS[{i}] cannot be empty "
+                        "for SERVER_ENERGY_MODEL='spec_linear_interpolation'"
+                    )
+
+                previous_percentage = None
+
+                for j, point in enumerate(curve):
+
+                    # Check that each point has exactly two values: percentage and watts
+                    if not isinstance(point, (tuple, list)) or len(point) != 2:
+                        raise MintEDGESettingsError(
+                            f"Invalid SPEC_POWER_CURVE point at settings.SERVERS[{i}]"
+                            f"['SPEC_POWER_CURVE'][{j}]. Each point must be "
+                            "(percentage, watts), for example (10, 265)"
+                        )
+
+                    percentage, watts = point
+
+                    # Check that the percentage value is not empty
+                    if percentage is None:
+                        raise MintEDGESettingsError(
+                            f"SPEC_POWER_CURVE percentage cannot be empty at "
+                            f"settings.SERVERS[{i}]['SPEC_POWER_CURVE'][{j}]"
+                        )
+
+                    # Check that the watts value is not empty
+                    if watts is None:
+                        raise MintEDGESettingsError(
+                            f"SPEC_POWER_CURVE watts value cannot be empty at "
+                            f"settings.SERVERS[{i}]['SPEC_POWER_CURVE'][{j}]"
+                        )
+
+                    # Check that the percentage is numeric
+                    if not isinstance(percentage, (int, float)):
+                        raise MintEDGESettingsError(
+                            f"SPEC_POWER_CURVE percentage must be numeric at "
+                            f"settings.SERVERS[{i}]['SPEC_POWER_CURVE'][{j}]"
+                        )
+
+                    # Check that the watts value is numeric
+                    if not isinstance(watts, (int, float)):
+                        raise MintEDGESettingsError(
+                            f"SPEC_POWER_CURVE watts value must be numeric at "
+                            f"settings.SERVERS[{i}]['SPEC_POWER_CURVE'][{j}]"
+                        )
+
+                    # Check that the percentage is inside the valid utilization range
+                    if percentage < 0 or percentage > 100:
+                        raise MintEDGESettingsError(
+                            f"SPEC_POWER_CURVE percentage must be between 0 and 100 at "
+                            f"settings.SERVERS[{i}]['SPEC_POWER_CURVE'][{j}]"
+                        )
+
+                    # Check that the watts value is positive
+                    if watts <= 0:
+                        raise MintEDGESettingsError(
+                            f"SPEC_POWER_CURVE watts value must be > 0 at "
+                            f"settings.SERVERS[{i}]['SPEC_POWER_CURVE'][{j}]"
+                        )
+
+                    # Check that percentages are strictly ordered from lowest to highest
+                    if previous_percentage is not None and percentage <= previous_percentage:
+                        raise MintEDGESettingsError(
+                            f"SPEC_POWER_CURVE percentages in settings.SERVERS[{i}] "
+                            "must be strictly ordered from lowest to highest"
+                        )
+
+                    previous_percentage = percentage
 
         

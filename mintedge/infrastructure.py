@@ -8,20 +8,18 @@ from tqdm import tqdm
 from multipledispatch import dispatch
 
 import settings
-
-import settings
 from mintedge import (
     EnergyAware,
     EnergyMeasurement,
     EnergyModelLink,
     EnergyModelServer,
-    EnergyModelServerPowerLaw, 
+    EnergyModelServerPowerLaw,
     EnergyModelServerEmpirical,
     EnergyModelServerFrequency,
+    EnergyModelServerSpecLinearInterpolation,
     Location,
     Service,
     User,
-
 )
 
 
@@ -57,6 +55,8 @@ class EdgeServer(EnergyAware):
         "voltages",
         "activity_factor",
         "capacitance",
+        "spec_power_curve",
+        
         
     ]
 
@@ -72,7 +72,7 @@ class EdgeServer(EnergyAware):
 
             frequencies: Optional[List[float]] = None,
             voltages: Optional[List[float]] = None,
-            
+            spec_power_curve: Optional[List[tuple]] = None,
         ):
 
         """This class represents an edge server in the infrastructure.
@@ -107,6 +107,7 @@ class EdgeServer(EnergyAware):
         self.voltages = voltages 
         self.activity_factor = activity_factor
         self.capacitance = capacitance
+        self.spec_power_curve = spec_power_curve
 
         # cambia el modelo de energia segun la configuracion
         if settings.SERVER_ENERGY_MODEL == "linear":
@@ -117,6 +118,8 @@ class EdgeServer(EnergyAware):
             self.energy_model = EnergyModelServerEmpirical(alpha=settings.ALPHA)
         elif settings.SERVER_ENERGY_MODEL == "frequency":
             self.energy_model = EnergyModelServerFrequency()
+        elif settings.SERVER_ENERGY_MODEL == "spec_linear_interpolation":
+            self.energy_model = EnergyModelServerSpecLinearInterpolation()
         else:
             raise ValueError("Unknown SERVER_ENERGY_MODEL")
 

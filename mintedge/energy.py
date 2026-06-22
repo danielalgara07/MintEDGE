@@ -27,7 +27,6 @@ from typing import Union, Collection, Callable, Optional, Iterable, Sequence
 
 # import simpy
 from simpy.core import Environment
-
 _unnamed_energy_meters_created = 0
 
 
@@ -218,10 +217,7 @@ class EnergyModelServerFrequency(EnergyModel):
     def measure(self) -> EnergyMeasurement:
 
         if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
-            return EnergyMeasurement(
-                dynamic=max(0, self.server.max_power - self.server.idle_power),
-                idle=self.server.idle_power,
-            )
+            return EnergyMeasurement(dynamic=self.server.max_power, idle=self.server.idle_power)
 
         if not self.server.is_on:
             return EnergyMeasurement(dynamic=0, idle=0)
@@ -240,6 +236,49 @@ class EnergyModelServerFrequency(EnergyModel):
         return EnergyMeasurement(dynamic=dynamic_power, idle=self.server.idle_power)
     
 
+#----------Modelo potencia de servidor 4 (interpolación lineal específica)-----
+#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
+
+class EnergyModelServerSpecLinearInterpolation(EnergyModel):
+    def measure(self) -> EnergyMeasurement:
+        
+        if not self.server.is_on:
+            return EnergyMeasurement(dynamic=0, idle=0)
+
+        if self.server.env.now < self.server.last_onoff_time + self.server.boot_time:
+            return EnergyMeasurement(dynamic=self.server.max_power, idle=self.server.idle_power)
+        
+        curve = self.server.spec_power_curve
+
+        utilization_pct = self.server.get_utilization() * 100
+
+        # If the utilization is below the first point of the curve, use the first point's power
+        if utilization_pct <= curve[0][0]:
+            total_power = float(curve[0][1])
+
+        # If the utilization is above the last point of the curve, use the last point's power
+        elif utilization_pct >= curve[-1][0]:
+            total_power = float(curve[-1][1])
+
+        else:
+            for i in range(len(curve) - 1):
+                u1, p1 = curve[i]
+                u2, p2 = curve[i + 1]
+
+                if u1 <= utilization_pct <= u2:
+                    total_power = float(
+                        p1 + ((utilization_pct - u1) / (u2 - u1)) * (p2 - p1)
+                    )
+                    break
+
+        idle_power = self.server.idle_power
+        dynamic_power = total_power - idle_power
+
+        return EnergyMeasurement(dynamic=dynamic_power,idle=idle_power)
+    
+    def set_parent(self, parent):
+        self.server = parent
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
