@@ -118,7 +118,80 @@ SERVERS = [
     #    "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
     #},
 
-    { # ASUSTeK RS720A-E13-RS8U - AMD EPYC 9965, 2 chips, 384 cores total
+    #{ # ASUSTeK RS720A-E13-RS8U - AMD EPYC 9965, 2 chips, 384 cores total
+    #    "MAX_POWER": 800,
+    #    "IDLE_POWER": 150,
+    #    "MAX_CAPACITY": 39140079,  # SPECpower_ssj2008 ssj_ops @ 100%
+    #    "BOOT_TIME": 20,
+    #    "SPEC_POWER_CURVE": [
+    #        (0, 150),
+    #        (10, 265),
+    #        (20, 315),
+    #        (30, 362),
+    #        (40, 413),
+    #        (50, 462),
+    #        (60, 504),
+    #        (70, 546),
+    #        (80, 589),
+    #        (90, 680),
+    #        (100, 800),
+    #    ],
+    #    "ACTIVITY_FACTOR": 1.0,
+    #    "CAPACITANCE": None,
+    #    "FREQUENCIES": [1.5e9, 2.0e9, 2.5e9, 3.0e9],  # inventado´
+    #    "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
+    #},
+
+    
+    {  # 1 - Dell PowerEdge R7725 - AMD EPYC 9965, 2 chips, 384 cores total
+        "MAX_POWER": 861,
+        "IDLE_POWER": 138,
+        "MAX_CAPACITY": 40017802,  # SPECpower_ssj2008 ssj_ops @ 100%
+        "BOOT_TIME": 20,
+        "SPEC_POWER_CURVE": [
+            (0, 138),
+            (10, 297),
+            (20, 367),
+            (30, 438),
+            (40, 515),
+            (50, 593),
+            (60, 661),
+            (70, 710),
+            (80, 771),
+            (90, 812),
+            (100, 861),
+        ],
+        "ACTIVITY_FACTOR": 1.0,
+        "CAPACITANCE": None,
+        "FREQUENCIES": [1.5e9, 2.0e9, 2.5e9, 3.0e9],  # inventado
+        "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
+    },
+
+    """{  # 2 - Colfax International CX2266-N2 - AMD Opteron 2216HE, 2 chips, 4 cores total
+        "MAX_POWER": 276,
+        "IDLE_POWER": 164,
+        "MAX_CAPACITY": 95853,  # SPECpower_ssj2008 ssj_ops @ 100%
+        "BOOT_TIME": 20,
+        "SPEC_POWER_CURVE": [
+            (0, 164),
+            (10, 204),
+            (20, 225),
+            (30, 234),
+            (40, 242),
+            (50, 248),
+            (60, 254),
+            (70, 260),
+            (80, 267),
+            (90, 272),
+            (100, 276),
+        ],
+        "ACTIVITY_FACTOR": 1.0,
+        "CAPACITANCE": None,
+        "FREQUENCIES": [1.5e9, 2.0e9, 2.4e9],  # inventado
+        "VOLTAGES": [1.0, 1.1, 1.2, 1.3],  # inventado
+     },
+
+    {  # 3 - ASUSTeK RS720A-E13-RS8U - AMD EPYC 9965, 2 chips, 384 cores total
         "MAX_POWER": 800,
         "IDLE_POWER": 150,
         "MAX_CAPACITY": 39140079,  # SPECpower_ssj2008 ssj_ops @ 100%
@@ -138,114 +211,59 @@ SERVERS = [
         ],
         "ACTIVITY_FACTOR": 1.0,
         "CAPACITANCE": None,
-        "FREQUENCIES": [1.5e9, 2.0e9, 2.5e9, 3.0e9],  # inventado´
+        "FREQUENCIES": [1.5e9, 2.0e9, 2.5e9, 3.0e9],  # inventado
         "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
     },
 
-    #{  # Supermicro SuperWorkstation 5039A-i Intel Xeon W-2123 
-    #    "MAX_POWER": 28.21,
-    #    "IDLE_POWER": 0,
-    #    "MAX_CAPACITY": 274000,  # normalizado desde SPEC CPU2017: SPECrate2017_int_base = 27.4 -> 27.4 * 10000
-    #    "BOOT_TIME": 20,
+    {  # 4 - Lenovo ThinkSystem ST45 V3 - AMD EPYC 4465P, 1 chip, 12 cores total
+        "MAX_POWER": 105,
+        "IDLE_POWER": 21.5,
+        "MAX_CAPACITY": 2806077,  # SPECpower_ssj2008 ssj_ops @ 100%
+        "BOOT_TIME": 20,
+        "SPEC_POWER_CURVE": [
+            (0, 21.5),
+            (10, 45.7),
+            (20, 49.7),
+            (30, 52.1),
+            (40, 56.8),
+            (50, 62.3),
+            (60, 70.1),
+            (70, 103),
+            (80, 103),
+            (90, 104),
+            (100, 105),
+        ],
+        "ACTIVITY_FACTOR": 1.0,
+        "CAPACITANCE": None,
+        "FREQUENCIES": [1.5e9, 2.0e9, 2.5e9, 3.0e9, 3.4e9],  # inventado
+        "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
+    },
 
-    #    "CAPACITANCE": 8.2e-9,  # Ceff del artículo: Ceff = 8.2e-9 F.
-    #    "ACTIVITY_FACTOR": 1.0,  # se deja a 1 porque la capacitancia ya es Ceffç
-    #    "FREQUENCIES": [
-    #        1.2e9, 1.4e9, 1.6e9, 1.8e9, 2.0e9, 2.2e9, 2.4e9,
-    #        2.6e9, 2.8e9, 3.0e9, 3.2e9, 3.4e9, 3.6e9
-    #    ],  # pasos de 200 MHz dentro del rango medido 1.2-3.6 GHz
-    #     "VOLTAGES": [
-    #        0.756, 0.774, 0.792, 0.810, 0.828, 0.846, 0.865,
-    #        0.883, 0.901, 0.919, 0.937, 0.955, 0.973
-    #    ],  # interpolado linealmente entre 0.756 V a 1.2 GHz y 0.973 V a 3.6 GHz
-    #},
-
-    #{  # HP ProLiant DL180 G5 Intel Xeon L5420
-    #    "MAX_POWER": 189,
-    #    "IDLE_POWER": 106,
-    #    "MAX_CAPACITY": 282281,  # SPECpower_ssj2008: ssj_ops@100% = 282,281
-    #    "BOOT_TIME": 20,    
-
-    #    "CAPACITANCE": 12.6e-9,  # calculado a partir de la suma de la tabla de capacitancias
-    #    "ACTIVITY_FACTOR": 1,  # supuesto de actividad completa, ya que la capacitancia ya es Ceff
-    #    "FREQUENCIES": [2.0e9, 2.5e9],  # del artículo: dos P-states, 2.0 GHz y 2.5 GHz
-    #    "VOLTAGES": [1.104, 1.104],  # del artículo: Intel SpeedStep a 2.0 GHz y 2.5 GHz usa 1.104 V
-    #},
-    #----------------------------------------------------------------------------------------
-    #----------------------------------------------------------------------------------------
-    #{  # Supermicro 2021M-UR+ AMD Opteron 2380, 2 chips, 8 cores total
-    #    "MAX_POWER": 269,
-    #    "IDLE_POWER": 138,
-    #    "MAX_CAPACITY": 308089,  # SPECpower_ssj2008
-    #    "BOOT_TIME": 20,
-
-    #    "CAPACITANCE": None,  # no encontrado
-    #    "ACTIVITY_FACTOR": 1,
-    #    "FREQUENCIES": [2.5e9, 1.8e9, 1.3e9, 0.8e9],
-        # AMD da rangos, uso el punto medio:
-        # P0: 1.150-1.325 V, P1: 1.050-1.225 V,
-        # P2: 0.950-1.125 V, P3: 0.875-1.050 V
-        #"VOLTAGES": [1.2375, 1.1375, 1.0375, 0.9625],
-    #},
-
-    #{  # HP ProLiant DL385 G5p AMD Opteron 2384, 2 chips, 8 cores total
-    #    "MAX_POWER": 257,
-    #    "IDLE_POWER": 147,
-    #    "MAX_CAPACITY": 341306,  # SPECpower_ssj2008: ssj_ops@100% = 341,306
-    #    "BOOT_TIME": 20,
-
-    #    "CAPACITANCE": None,  # no encontrado
-    #    "ACTIVITY_FACTOR": 1,
-    #    "FREQUENCIES": [2.7e9, 2.0e9, 1.5e9, 0.8e9],
-        # AMD da rangos, uso el punto medio:
-        # P0: 1.150-1.325 V, P1: 1.050-1.225 V,
-        # P2: 0.950-1.125 V, P3: 0.850-1.025 V
-        #"VOLTAGES": [1.2375, 1.1375, 1.0375, 0.9375],
-    #   },
-
-    #{  # HP ProLiant DL385 G6 AMD Opteron 2435, 2 chips, 12 cores total
-    #    "MAX_POWER": 260,
-    #    "IDLE_POWER": 124,
-    #    "MAX_CAPACITY": 535814,  # SPECpower_ssj2008: ssj_ops@100% = 535,814
-    #    "BOOT_TIME": 20,
-
-    #    "CAPACITANCE": 24e-9,  # no encontrado x1-->18.55e-9
-    #    "ACTIVITY_FACTOR": 1,
-    #    "FREQUENCIES": [0.8e9, 1.4e9, 1.7e9, 2.1e9, 2.6e9],
-        # AMD da rangos
-        # P0: 1.075-1.300 V, P1: 1.025-1.250 V,
-        # P2: 1.000-1.225 V, P3: 0.975-1.200 V,
-        # P4: 0.900-1.125 V
-    #    "VOLTAGES": [1.125, 1.2, 1.225, 1.250, 1.3],
-    #},
-    #----------------------------------------------------------------------------------------
-    #----------------------------------------------------------------------------------------
-
-    #{  # TI OMAP3530 / OMAP35x - ARM Cortex-A8 arquitectura 0.65 mm
-    #    "MAX_POWER": 1.679,       
-    #    "IDLE_POWER": 0.0069,      
-    #    "MAX_CAPACITY": 10000000,      
-    #    "BOOT_TIME": 20,
-
-    #    "CAPACITANCE": 0.52e-9,   # Ceff = A*C, derivado de 0.52 mA/MHz/V
-    #    "ACTIVITY_FACTOR": 1.0,   # Ceff ya incluye actividad efectiva
-    #    "FREQUENCIES": [125e6, 250e6, 500e6, 550e6, 600e6],
-    #    "VOLTAGES": [0.95, 1.00, 1.20, 1.27, 1.35],
-    #},
-
-
-    # {  # FUJITSU Server PRIMERGY CX2560 M7 PRIMERGY CX400 M6
-    #     "MAX_POWER": 2336,
-    #     "IDLE_POWER": 541,
-    #     "MAX_CAPACITY": 33244766,
-    #     "BOOT_TIME": 20,
-
-    #     "MAX_FREQUENCY": ,
-    #     "MIN_FREQUENCY": ,
-    #     "TOTAL_CORES": ,
-    # },
+    {  # 5 - HPE ProLiant ML350 Gen11 - Intel Xeon Platinum 8592+, 2 chips, 128 cores total
+        "MAX_POWER": 629,
+        "IDLE_POWER": 232,
+        "MAX_CAPACITY": 13338557,  # SPECpower_ssj2008 ssj_ops @ 100%
+        "BOOT_TIME": 20,
+        "SPEC_POWER_CURVE": [
+            (0, 232),
+            (10, 270),
+            (20, 309),
+            (30, 346),
+            (40, 382),
+            (50, 421),
+            (60, 462),
+            (70, 504),
+            (80, 553),
+            (90, 595),
+            (100, 629),
+        ],
+        "ACTIVITY_FACTOR": 1.0,
+        "CAPACITANCE": None,
+        "FREQUENCIES": [1.5e9, 1.9e9, 2.3e9, 2.7e9, 3.0e9],  # inventado
+        "VOLTAGES": [1.0, 1.1, 1.2, 1.3, 1.4],  # inventado
+    },"""
 ]
-# Data from OpenSpecPower
+
 
 """SERVICES"""
 CAR_SERVICES = ["connected_vehicles"]
