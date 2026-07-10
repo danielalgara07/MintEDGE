@@ -251,8 +251,6 @@ def cargar_csvs(rutas_csv, alphas=None, labels=None):
             axis=1,
         )
 
-        # ID interno.
-        # Incluye el archivo, modelo y alpha para no mezclar curvas.
         df["curve_id"] = df.apply(
             lambda row: (
                 f"{i + 1}_{ruta.name}_"
@@ -328,7 +326,9 @@ def preparar_curvas(datos, step=None):
             indice_completo = sorted(set(indice_original + puntos_utilizacion))
 
             serie = serie.reindex(indice_completo)
+
             serie = serie.interpolate(method="index").ffill().bfill()
+
             serie = serie.loc[puntos_utilizacion]
 
             df_interpolado = pd.DataFrame(
@@ -351,6 +351,46 @@ def preparar_curvas(datos, step=None):
 
     return curvas
 
+
+def calcular_rango_y_curvas(curvas):
+    """
+    Calcula un rango adecuado para el eje Y.
+
+    Se añade mucho margen superior para que la leyenda pueda colocarse
+    arriba a la izquierda sin solaparse con las líneas.
+
+    También se ajusta el mínimo para no dejar demasiado espacio vacío abajo.
+    """
+
+    valores = []
+
+    for curva in curvas:
+        df_curva = curva["data"]
+
+        for value in df_curva["total_power_w"].dropna():
+            valores.append(float(value))
+
+    if not valores:
+        return None
+
+    y_min = min(valores)
+    y_max = max(valores)
+
+    rango = y_max - y_min
+
+    if rango <= 0:
+        rango = max(abs(y_max), 1.0)
+
+    # Poco margen abajo
+    margen_inferior = rango * 0.05
+
+    # Mucho margen arriba para que entre la leyenda
+    margen_superior = rango * 0.45
+
+    y_min_final = max(0.0, y_min - margen_inferior)
+    y_max_final = y_max + margen_superior
+
+    return [y_min_final, y_max_final]
 
 def interpolar_potencia_en_puntos(df_curva, puntos_utilizacion):
     """
@@ -613,7 +653,6 @@ def crear_tabla_ranking(resultados):
     curvas = []
     modelos = []
     alphas = []
-    archivos = []
     puntos = []
     rmse = []
     mae = []
@@ -631,7 +670,6 @@ def crear_tabla_ranking(resultados):
         else:
             alphas.append(alpha_formateado)
 
-        archivos.append(resultado["source_file"])
         puntos.append(resultado["points_compared"])
         rmse.append(f"{resultado['rmse_w']:.4f}")
         mae.append(f"{resultado['mae_w']:.4f}")
@@ -649,7 +687,6 @@ def crear_tabla_ranking(resultados):
                 "Curva",
                 "Modelo",
                 "Alpha",
-                "Archivo",
                 "Puntos",
                 "RMSE (W)",
                 "MAE (W)",
@@ -664,7 +701,6 @@ def crear_tabla_ranking(resultados):
                 curvas,
                 modelos,
                 alphas,
-                archivos,
                 puntos,
                 rmse,
                 mae,
@@ -673,7 +709,11 @@ def crear_tabla_ranking(resultados):
             ],
             align="left",
         ),
-        columnwidth=[60, 260, 90, 80, 180, 70, 90, 90, 110, 90],
+        domain=dict(
+            x=[0.02, 0.63],
+            y=[0.15, 0.95],
+        ),
+        columnwidth=[50, 180, 60, 40, 45, 70, 65, 100, 70],
     )
 
     return tabla
@@ -729,24 +769,53 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
         f"(RMSE={mejor['rmse_w']:.4f} W)</sup>"
     )
 
+    rango_y = calcular_rango_y_curvas(curvas)
+
     fig_curvas.update_layout(
-        title=titulo_curvas,
-        xaxis_title="Utilización (%)",
-        yaxis_title="Potencia total (W)",
+        title=dict(
+            text=titulo_curvas,
+            font=dict(size=24),
+            x=0.02,
+            xanchor="left",
+        ),
+        xaxis=dict(
+            title=dict(
+                text="Utilización (%)",
+                font=dict(size=22),
+            ),
+            range=[-1, 108],
+            dtick=10,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title=dict(
+                text="Potencia total (W)",
+                font=dict(size=22),
+            ),
+            range=rango_y,
+            nticks=20,
+            zeroline=False,
+        ),
+        paper_bgcolor="#e0e0e0",
+        plot_bgcolor="#e0e0e0",
         template="plotly_white",
         hovermode="x unified",
         autosize=True,
         margin=dict(
-            l=70,
-            r=30,
-            t=90,
-            b=60,
+            l=110,
+            r=90,
+            t=95,
+            b=70,
         ),
         legend=dict(
-            x=1.02,
-            y=1,
+            x=0.08,
+            y=0.98,
             xanchor="left",
             yanchor="top",
+            bgcolor="rgba(255,255,255,0.90)",
+            bordercolor="rgba(0,0,0,0.25)",
+            borderwidth=1,
+            font=dict(size=17),
         ),
     )
 
