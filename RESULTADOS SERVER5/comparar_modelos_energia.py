@@ -128,6 +128,9 @@ def normalizar_nombre_modelo(nombre: str) -> str:
         "empitical": "empirical",
         "empirical": "empirical",
         "empirico": "empirical",
+
+        "frequency": "frequency",
+        "frecuencia": "frequency",
     }
 
     return equivalencias.get(nombre, nombre)
@@ -248,8 +251,14 @@ def cargar_csvs(rutas_csv, alphas=None, labels=None):
             axis=1,
         )
 
-        # ID interno para evitar mezclar curvas si dos archivos tienen el mismo nombre/modelo.
-        df["curve_id"] = f"{i + 1}_{ruta.name}"
+        df["curve_id"] = df.apply(
+            lambda row: (
+                f"{i + 1}_{ruta.name}_"
+                f"{row['model']}_"
+                f"{format_alpha(row['alpha'])}"
+            ),
+            axis=1,
+        )
 
         dataframes.append(df)
 
@@ -317,7 +326,9 @@ def preparar_curvas(datos, step=None):
             indice_completo = sorted(set(indice_original + puntos_utilizacion))
 
             serie = serie.reindex(indice_completo)
+
             serie = serie.interpolate(method="index").ffill().bfill()
+
             serie = serie.loc[puntos_utilizacion]
 
             df_interpolado = pd.DataFrame(
@@ -340,6 +351,46 @@ def preparar_curvas(datos, step=None):
 
     return curvas
 
+
+def calcular_rango_y_curvas(curvas):
+    """
+    Calcula un rango adecuado para el eje Y.
+
+    Se añade mucho margen superior para que la leyenda pueda colocarse
+    arriba a la izquierda sin solaparse con las líneas.
+
+    También se ajusta el mínimo para no dejar demasiado espacio vacío abajo.
+    """
+
+    valores = []
+
+    for curva in curvas:
+        df_curva = curva["data"]
+
+        for value in df_curva["total_power_w"].dropna():
+            valores.append(float(value))
+
+    if not valores:
+        return None
+
+    y_min = min(valores)
+    y_max = max(valores)
+
+    rango = y_max - y_min
+
+    if rango <= 0:
+        rango = max(abs(y_max), 1.0)
+
+    # Poco margen abajo
+    margen_inferior = rango * 0.05
+
+    # Mucho margen arriba para que entre la leyenda
+    margen_superior = rango * 0.45
+
+    y_min_final = max(0.0, y_min - margen_inferior)
+    y_max_final = y_max + margen_superior
+
+    return [y_min_final, y_max_final]
 
 def interpolar_potencia_en_puntos(df_curva, puntos_utilizacion):
     """
@@ -382,7 +433,7 @@ def calcular_parecido_con_spec(curvas):
     if len(curvas_spec) == 0:
         raise ValueError(
             "No se ha encontrado ningún modelo SPEC. "
-            "Debe haber exactamente un CSV con model=spec."
+            "Debe haber exactamente un CSV o una curva con model=spec."
         )
 
     if len(curvas_spec) > 1:
@@ -451,6 +502,7 @@ def calcular_parecido_con_spec(curvas):
 
         resultados.append(
             {
+                "curve_id": curva["id"],
                 "curve_name": curva["name"],
                 "model": curva["model"],
                 "alpha": curva["alpha"],
@@ -478,7 +530,7 @@ def calcular_parecido_con_spec(curvas):
 
 def crear_texto_conclusion(curva_spec, resultados):
     """
-    Crea la conclusión que se mostrará dentro de la gráfica.
+    Crea la conclusión que se mostrará dentro del HTML.
     """
 
     mejor = resultados[0]
@@ -601,7 +653,6 @@ def crear_tabla_ranking(resultados):
     curvas = []
     modelos = []
     alphas = []
-    archivos = []
     puntos = []
     rmse = []
     mae = []
@@ -619,7 +670,6 @@ def crear_tabla_ranking(resultados):
         else:
             alphas.append(alpha_formateado)
 
-        archivos.append(resultado["source_file"])
         puntos.append(resultado["points_compared"])
         rmse.append(f"{resultado['rmse_w']:.4f}")
         mae.append(f"{resultado['mae_w']:.4f}")
@@ -637,7 +687,6 @@ def crear_tabla_ranking(resultados):
                 "Curva",
                 "Modelo",
                 "Alpha",
-                "Archivo",
                 "Puntos",
                 "RMSE (W)",
                 "MAE (W)",
@@ -652,7 +701,6 @@ def crear_tabla_ranking(resultados):
                 curvas,
                 modelos,
                 alphas,
-                archivos,
                 puntos,
                 rmse,
                 mae,
@@ -661,56 +709,20 @@ def crear_tabla_ranking(resultados):
             ],
             align="left",
         ),
-        visible=False,
+        domain=dict(
+            x=[0.02, 0.63],
+            y=[0.15, 0.95],
+        ),
+        columnwidth=[50, 180, 60, 40, 45, 70, 65, 100, 70],
     )
 
     return tabla
 
 
-def crear_anotacion_leyenda_metricas():
-    """
-    Crea una pequeña leyenda informativa para la vista de comparación.
-
-    No ocupa espacio en la tabla. Solo muestra la explicación cuando
-    pasas el cursor por encima del texto "ℹ️ Leyenda de métricas".
-    """
-
-    texto_hover = (
-        "<b>Leyenda de métricas</b><br><br>"
-        "<b>Puntos:</b> número de puntos de utilización comparados contra SPEC.<br>"
-        "<b>RMSE:</b> raíz del error cuadrático medio. Penaliza más los errores grandes.<br>"
-        "<b>MAE:</b> error medio absoluto. Indica el error medio en vatios.<br>"
-        "<b>Error máx.:</b> mayor diferencia encontrada respecto a SPEC.<br>"
-        "<b>MAPE:</b> error porcentual medio respecto a SPEC.<br><br>"
-        "<b>Conclusión:</b> el mejor modelo es el que tiene menor RMSE."
-    )
-
-    return dict(
-        text="ℹ️ Leyenda de métricas",
-        x=0.01,
-        y=1.04,
-        xref="paper",
-        yref="paper",
-        showarrow=False,
-        align="left",
-        font=dict(
-            size=12,
-            color="#1f77b4",
-        ),
-        bgcolor="rgba(255,255,255,0.75)",
-        bordercolor="rgba(0,0,0,0.25)",
-        borderwidth=1,
-        borderpad=4,
-        hovertext=texto_hover,
-        hoverlabel=dict(
-            bgcolor="white",
-            font=dict(size=12),
-        ),
-        captureevents=True,
-    )
-
 def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
-    mejor_curva = resultados_parecido[0]["curve_name"]
+    mejor = resultados_parecido[0]
+    mejor_curve_id = mejor["curve_id"]
+    mejor_curva = mejor["curve_name"]
 
     # ------------------------------------------------------------------
     # FIGURA 1: Curvas de potencia
@@ -730,7 +742,7 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
 
         nombre_traza = curva["name"]
 
-        if curva["name"] == mejor_curva:
+        if curva["id"] == mejor_curve_id:
             nombre_traza = "★ " + nombre_traza
 
         fig_curvas.add_trace(
@@ -754,27 +766,56 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
     titulo_curvas = (
         "Comparación de potencia total por medición"
         f"<br><sup>★ Más parecido a SPEC: {mejor_curva} "
-        f"(RMSE={resultados_parecido[0]['rmse_w']:.4f} W)</sup>"
+        f"(RMSE={mejor['rmse_w']:.4f} W)</sup>"
     )
 
+    rango_y = calcular_rango_y_curvas(curvas)
+
     fig_curvas.update_layout(
-        title=titulo_curvas,
-        xaxis_title="Utilización (%)",
-        yaxis_title="Potencia total (W)",
+        title=dict(
+            text=titulo_curvas,
+            font=dict(size=24),
+            x=0.02,
+            xanchor="left",
+        ),
+        xaxis=dict(
+            title=dict(
+                text="Utilización (%)",
+                font=dict(size=26),
+            ),
+            range=[-1, 108],
+            dtick=10,
+            zeroline=False,
+        ),
+        yaxis=dict(
+            title=dict(
+                text="Potencia total (W)",
+                font=dict(size=26),
+            ),
+            range=rango_y,
+            nticks=20,
+            zeroline=False,
+        ),
+        paper_bgcolor="#ffffff", # "#e0e0e0"
+        plot_bgcolor="#ffffff",
         template="plotly_white",
         hovermode="x unified",
         autosize=True,
         margin=dict(
-            l=70,
-            r=30,
-            t=90,
-            b=60,
+            l=110,
+            r=90,
+            t=95,
+            b=70,
         ),
         legend=dict(
-            x=1.02,
-            y=1,
+            x=0.08,
+            y=0.98,
             xanchor="left",
             yanchor="top",
+            bgcolor="rgba(255,255,255,0.90)",
+            bordercolor="rgba(0,0,0,0.25)",
+            borderwidth=1,
+            font=dict(size=17),
         ),
     )
 
@@ -785,43 +826,17 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
     fig_comparacion = go.Figure()
 
     tabla_ranking = crear_tabla_ranking(resultados_parecido)
-    tabla_ranking.visible = True
-
     fig_comparacion.add_trace(tabla_ranking)
 
-    conclusion = crear_texto_conclusion(
-        curva_spec=curva_spec,
-        resultados=resultados_parecido,
-    )
-
     fig_comparacion.update_layout(
-        title=dict(
-            text="Datos de comparación contra SPEC",
-            x=0.02,
-            y=0.96,
-            xanchor="left",
-            yanchor="top",
-        ),
         template="plotly_white",
         autosize=True,
         margin=dict(
-            l=40,
-            r=40,
-            t=190,
-            b=40,
+            l=30,
+            r=30,
+            t=20,
+            b=30,
         ),
-        annotations=[
-            dict(
-                text=conclusion,
-                x=0.5,
-                y=1.08,
-                xref="paper",
-                yref="paper",
-                showarrow=False,
-                align="center",
-                font=dict(size=13),
-            )
-        ],
     )
 
     # ------------------------------------------------------------------
@@ -833,7 +848,7 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
         include_plotlyjs=True,
         div_id="grafica-curvas-plotly",
         default_width="100%",
-        default_height="calc(100vh - 70px)",
+        default_height="100%",
     )
 
     div_comparacion = fig_comparacion.to_html(
@@ -841,7 +856,12 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
         include_plotlyjs=False,
         div_id="grafica-comparacion-plotly",
         default_width="100%",
-        default_height="calc(100vh - 70px)",
+        default_height="100%",
+    )
+
+    conclusion = crear_texto_conclusion(
+        curva_spec=curva_spec,
+        resultados=resultados_parecido,
     )
 
     texto_leyenda = (
@@ -910,6 +930,11 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
             display: block;
         }}
 
+        #vista-comparacion.vista-activa {{
+            display: flex;
+            flex-direction: column;
+        }}
+
         .leyenda-metricas {{
             display: inline-block;
             margin-left: 12px;
@@ -927,10 +952,36 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
             height: calc(100vh - 52px);
         }}
 
+        .comparacion-header {{
+            flex: 0 0 auto;
+            padding: 14px 24px 8px 24px;
+            border-bottom: 1px solid #eeeeee;
+            background: white;
+        }}
+
+        .comparacion-header h2 {{
+            margin: 0 0 8px 0;
+            font-size: 22px;
+            color: #222;
+        }}
+
+        .comparacion-header p {{
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.35;
+            color: #333;
+        }}
+
+        .tabla-wrapper {{
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
+        }}
+
         #grafica-curvas-plotly,
         #grafica-comparacion-plotly {{
             width: 100% !important;
-            height: calc(100vh - 52px) !important;
+            height: 100% !important;
         }}
 
         #grafica-curvas-plotly .plot-container,
@@ -974,11 +1025,26 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
         </div>
 
         <div id="vista-comparacion" class="vista">
-            {div_comparacion}
+            <div class="comparacion-header">
+                <h2>Datos de comparación contra SPEC</h2>
+                <p>{conclusion}</p>
+            </div>
+
+            <div class="tabla-wrapper">
+                {div_comparacion}
+            </div>
         </div>
     </div>
 
     <script>
+        function resizePlot(plotId) {{
+            const plot = document.getElementById(plotId);
+
+            if (plot && window.Plotly) {{
+                Plotly.Plots.resize(plot);
+            }}
+        }}
+
         function mostrarVista(vista) {{
             const vistaCurvas = document.getElementById("vista-curvas");
             const vistaComparacion = document.getElementById("vista-comparacion");
@@ -998,7 +1064,7 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
                 leyendaMetricas.style.display = "none";
 
                 setTimeout(function() {{
-                    Plotly.Plots.resize("grafica-curvas-plotly");
+                    resizePlot("grafica-curvas-plotly");
                 }}, 100);
             }}
 
@@ -1012,18 +1078,18 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
                 leyendaMetricas.style.display = "inline-block";
 
                 setTimeout(function() {{
-                    Plotly.Plots.resize("grafica-comparacion-plotly");
+                    resizePlot("grafica-comparacion-plotly");
                 }}, 100);
             }}
         }}
 
         window.addEventListener("resize", function() {{
-            Plotly.Plots.resize("grafica-curvas-plotly");
-            Plotly.Plots.resize("grafica-comparacion-plotly");
+            resizePlot("grafica-curvas-plotly");
+            resizePlot("grafica-comparacion-plotly");
         }});
 
         setTimeout(function() {{
-            Plotly.Plots.resize("grafica-curvas-plotly");
+            resizePlot("grafica-curvas-plotly");
         }}, 300);
     </script>
 
@@ -1035,6 +1101,7 @@ def crear_grafica(curvas, salida_html, curva_spec, resultados_parecido):
         f.write(html)
 
     print(f"Gráfica generada correctamente: {salida_html}")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -1071,7 +1138,7 @@ def main():
         help=(
             "Alpha de cada CSV, en el mismo orden en el que se pasan los archivos. "
             "Usa '-' o 'none' para los modelos que no tengan alpha. "
-            "Ejemplo: --alphas - 0.9 0.9"
+            "Ejemplo: --alphas none none 0.9 0.9"
         ),
     )
 

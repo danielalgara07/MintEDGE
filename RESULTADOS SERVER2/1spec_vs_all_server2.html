@@ -1,7 +1,157 @@
-<html>
-<head><meta charset="utf-8" /></head>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Comparación de modelos energéticos</title>
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: Arial, sans-serif;
+            background: white;
+            overflow: hidden;
+        }
+
+        .botonera {
+            height: 52px;
+            box-sizing: border-box;
+            background: white;
+            padding: 8px 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .boton {
+            padding: 8px 16px;
+            margin: 0 4px;
+            border: 1px solid #b8c7d9;
+            border-radius: 4px;
+            background: #f8fbff;
+            color: #1f3b5d;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .boton:hover {
+            background: #eaf2ff;
+        }
+
+        .boton-activo {
+            background: #dbeafe;
+            font-weight: bold;
+        }
+
+        .vista {
+            display: none;
+            width: 100%;
+            height: calc(100vh - 52px);
+        }
+
+        .vista-activa {
+            display: block;
+        }
+
+        #vista-comparacion.vista-activa {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .leyenda-metricas {
+            display: inline-block;
+            margin-left: 12px;
+            padding: 7px 10px;
+            border: 1px solid #b8c7d9;
+            border-radius: 4px;
+            background: #f8fbff;
+            color: #1f3b5d;
+            font-size: 13px;
+            cursor: help;
+        }
+
+        .contenedor {
+            width: 100%;
+            height: calc(100vh - 52px);
+        }
+
+        .comparacion-header {
+            flex: 0 0 auto;
+            padding: 14px 24px 8px 24px;
+            border-bottom: 1px solid #eeeeee;
+            background: white;
+        }
+
+        .comparacion-header h2 {
+            margin: 0 0 8px 0;
+            font-size: 22px;
+            color: #222;
+        }
+
+        .comparacion-header p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.35;
+            color: #333;
+        }
+
+        .tabla-wrapper {
+            flex: 1 1 auto;
+            min-height: 0;
+            width: 100%;
+        }
+
+        #grafica-curvas-plotly,
+        #grafica-comparacion-plotly {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        #grafica-curvas-plotly .plot-container,
+        #grafica-comparacion-plotly .plot-container {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        #grafica-curvas-plotly .svg-container,
+        #grafica-comparacion-plotly .svg-container {
+            width: 100% !important;
+            height: 100% !important;
+        }
+    </style>
+</head>
+
 <body>
-    <div style="height:100%; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+
+    <div class="botonera">
+        <button id="btn-curvas" class="boton boton-activo" onclick="mostrarVista('curvas')">
+            Curvas de potencia
+        </button>
+
+        <button id="btn-comparacion" class="boton" onclick="mostrarVista('comparacion')">
+            Comparación con SPEC
+        </button>
+
+        <span
+            id="leyenda-metricas"
+            class="leyenda-metricas"
+            title="Puntos: número de puntos de utilización comparados contra SPEC.
+RMSE: raíz del error cuadrático medio. Penaliza más los errores grandes.
+MAE: error medio absoluto. Indica el error medio en vatios.
+Error máx.: mayor diferencia encontrada respecto a SPEC.
+MAPE: error porcentual medio respecto a SPEC.
+Conclusión: el mejor modelo es el que tiene menor RMSE."
+            style="display: none;"
+        >
+            ℹ️ Leyenda de métricas
+        </span>
+    </div>
+
+    <div class="contenedor">
+        <div id="vista-curvas" class="vista vista-activa">
+            <div style="height:100%; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
         <script>/**
 * plotly.js v3.6.0
 * Copyright 2012-2026, Plotly, Inc.
@@ -3883,6 +4033,77 @@ maplibre-gl/dist/maplibre-gl.js:
 
 window.Plotly = Plotly;
 return Plotly;
-}));</script>                <div id="0bf6b89b-e5e3-4ca2-925c-8deaf23d800e" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("0bf6b89b-e5e3-4ca2-925c-8deaf23d800e")) {                    Plotly.newPlot(                        "0bf6b89b-e5e3-4ca2-925c-8deaf23d800e",                        [{"hovertemplate":"Curva: resultados_4_empirical09 - empirical\u003cbr\u003eModelo: empirical\u003cbr\u003eArchivo: resultados_4_empirical09.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"resultados_4_empirical09 - empirical","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACANUC3HNKR\u002fac2QKcvxIp8NzhA9wQbNC\u002fpOUCQAnb8HrA7QHBRHNNhhj1ATymvH5RoP0BMXnBQQqpAQGmP46RVpEFAXtdbn\u002fOhQkCqExyRraJDQPFY0QwspkRAbabMVSisRUBFVBIPaLRGQICxj0e6vkdA\u002fvbxY\u002fXKSEBcnp6a9dhJQCbTJ9Ob6EpATp9cy8z5S0B5NDhucAxNQKqxS09xIE5AXGRUQbw1T0Cqb7IAICZQQHH67Xj2sVBAHkbUcFo+UUACqZ5uRctRQKRBnYOxWFJA11ylO5nmUkDIiAOP93RTQEUkfNbHA1RAVN79wAWTVEBmarxKrSJVQIoueLW6slVAR\u002frCgSpDVkDKsBpp+dNWQEPTuVgkZVdA724Dbaj2V0CtbnTtgohYQPbvB0mxGllAJi7\u002fEjGtWUAAAAAAAEBaQA=="},"type":"scatter"},{"hovertemplate":"Curva: resultados_4_linear - linear\u003cbr\u003eModelo: linear\u003cbr\u003eArchivo: resultados_4_linear.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"resultados_4_linear - linear","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACANUBmZmZmZpY3QM3MzMzMrDlAMzMzMzPDO0CamZmZmdk9QAAAAAAA8D9AMzMzMzMDQUBmZmZmZg5CQJqZmZmZGUNAzczMzMwkREAAAAAAADBFQDMzMzMzO0ZAZmZmZmZGR0CamZmZmVFIQM3MzMzMXElAAAAAAABoSkAzMzMzM3NLQGZmZmZmfkxAmpmZmZmJTUDNzMzMzJROQAAAAAAAoE9AmpmZmZlVUEAzMzMzM9tQQMzMzMzMYFFAZmZmZmbmUUAAAAAAAGxSQJqZmZmZ8VJAMzMzMzN3U0DMzMzMzPxTQGZmZmZmglRAAAAAAAAIVUCZmZmZmY1VQDMzMzMzE1ZAzczMzMyYVkBmZmZmZh5XQAAAAAAApFdAmpmZmZkpWEAzMzMzM69YQM3MzMzMNFlAZmZmZma6WUAAAAAAAEBaQA=="},"type":"scatter"},{"hovertemplate":"Curva: resultados_4_powerlaw09 - powerlaw\u003cbr\u003eModelo: powerlaw\u003cbr\u003eArchivo: resultados_4_powerlaw09.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"resultados_4_powerlaw09 - powerlaw","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACANUAWsPo6z4Q4QPNp1Q4dIjtAbWFLMjedPUBSmF4bigFAQEjXcRbPLEFAvtGOVhxSQkCBblx8inJDQMqjT47djkRAPMI9+qWnRUBX7ONuUr1GQHQNlVk60EdAYCYAd6TgSEDu3iAky+5JQBnoCVLf+kpAAgkOnAoFTEAMyMfLcA1NQKX5pPkwFE5A55PWZ2YZT0CQsrCVlA5QQCsnWljHj1BABgGJElUQUUC89rNlRpBRQCifqyCjD1JArob4W3KOUkD+VmGRugxTQI\u002fxla+BilNAkAnBKs0HVEDSEJYKooRUQIioUPYEAVVArSECP\u002fp8VUDNyHbohfhVQN037rCrc1ZAUp\u002fWF2\u002fuVkADHLJj02hXQL0sRqfb4ldARsQvxopcWEC69\u002fF449VYQKKpkVDoTllAqJ7NuZvHWUAAAAAAAEBaQA=="},"type":"scatter"},{"hovertemplate":"Curva: resultados_4_spec - spec\u003cbr\u003eModelo: spec\u003cbr\u003eArchivo: resultados_4_spec.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"resultados_4_spec - spec","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACANUDNzMzMzIw7QM3MzMzMzEBANDMzMzPTQ0CamZmZmdlGQJqZmZmZWUdAmpmZmZnZR0CamZmZmVlIQJqZmZmZ2UhAZmZmZmYmSUA0MzMzM3NJQAAAAAAAwElAzczMzMwMSkAzMzMzM6NKQJqZmZmZOUtAAAAAAADQS0BmZmZmZmZMQGZmZmZmFk1AZmZmZmbGTUBmZmZmZnZOQGZmZmZmJk9AAAAAAAAQUEDNzMzMzIxQQJmZmZmZCVFAZmZmZmaGUUDMzMzMzJRTQDMzMzMzo1VAmpmZmZmxV0AAAAAAAMBZQAAAAAAAwFlAAAAAAADAWUAAAAAAAMBZQAAAAAAAwFlAAAAAAADQWUAAAAAAAOBZQAAAAAAA8FlAAAAAAAAAWkAAAAAAABBaQAAAAAAAIFpAAAAAAAAwWkAAAAAAAEBaQA=="},"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"title":{"text":"Comparaci\u00f3n de potencia total por medici\u00f3n"},"xaxis":{"title":{"text":"Utilizaci\u00f3n (%)"}},"yaxis":{"title":{"text":"Potencia total (W)"}},"hovermode":"x unified"},                        {"responsive": true}                    )                };            </script>        </div>
+}));</script>                <div id="grafica-curvas-plotly" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("grafica-curvas-plotly")) {                    Plotly.newPlot(                        "grafica-curvas-plotly",                        [{"hovertemplate":"Curva: resultados_2_spec - spec\u003cbr\u003eModelo: spec\u003cbr\u003eArchivo: resultados_2_spec.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"resultados_2_spec - spec","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACAZEAAAAAAAMBlQAAAAAAAAGdAAAAAAABAaEAAAAAAAIBpQAAAAAAAKGpAAAAAAADQakAAAAAAAHhrQAAAAAAAIGxAAAAAAABobEAAAAAAALBsQAAAAAAA+GxAAAAAAABAbUAAAAAAAIBtQAAAAAAAwG1AAAAAAAAAbkAAAAAAAEBuQAAAAAAAcG5AAAAAAACgbkAAAAAAANBuQAAAAAAAAG9AAAAAAAAwb0AAAAAAAGBvQAAAAAAAkG9AAAAAAADAb0AAAAAAAPBvQAAAAAAAEHBAAAAAAAAocEAAAAAAAEBwQAAAAAAAXHBAAAAAAAB4cEAAAAAAAJRwQAAAAAAAsHBAAAAAAADEcEAAAAAAANhwQAAAAAAA7HBAAAAAAAAAcUAAAAAAABBxQAAAAAAAIHFAAAAAAAAwcUAAAAAAAEBxQA=="},"type":"scatter"},{"hovertemplate":"Curva: resultados_2_linear - linear\u003cbr\u003eModelo: linear\u003cbr\u003eArchivo: resultados_2_linear.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"resultados_2_linear - linear","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACAZECamZmZmdlkQDMzMzMzM2VAzczMzMyMZUBmZmZmZuZlQAAAAAAAQGZAmpmZmZmZZkAzMzMzM\u002fNmQM3MzMzMTGdAZmZmZmamZ0AAAAAAAABoQJqZmZmZWWhAMzMzMzOzaEDNzMzMzAxpQGZmZmZmZmlAAAAAAADAaUCamZmZmRlqQDMzMzMzc2pAzczMzMzMakBmZmZmZiZrQAAAAAAAgGtAmpmZmZnZa0AzMzMzMzNsQM3MzMzMjGxAZmZmZmbmbEAAAAAAAEBtQJqZmZmZmW1AMzMzMzPzbUDNzMzMzExuQGZmZmZmpm5AAAAAAAAAb0CamZmZmVlvQDMzMzMzs29AZmZmZmYGcEAzMzMzMzNwQAAAAAAAYHBAzczMzMyMcECamZmZmblwQGZmZmZm5nBANDMzMzMTcUAAAAAAAEBxQA=="},"type":"scatter"},{"hovertemplate":"Curva: resultados_2_empirical21 - empirical (alpha=2.1)\u003cbr\u003eModelo: empirical\u003cbr\u003eAlpha: 2.1\u003cbr\u003eArchivo: resultados_2_empirical21.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"resultados_2_empirical21 - empirical (alpha=2.1)","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACAZECBAyKqpjFlQI6rWmrC32VAeNrRWwqKZkDII4LOVDBnQO2WtYyD0mdAog+sq35waEBuUetGMgppQMCY40mNn2lA0eVZtYAwakDZ\u002fAMm\u002f7xqQGQM6oD8RGtA4tU+t23Ia0A0k5eZSEdsQPpWprWDwWxA3y9kOxY3bUD0i6Xn96dtQCLDuPIgFG5AdkcYAop7bkC0m38cLN5uQEpp4Z8APG9A9d\u002fdOAGVb0D51W\u002fbJ+lvQEn+S143HHBA+vJsJmhBcEBm8LOZI2RwQN\u002fa8CRnhHBAINxHTDCicEBX5oOpfL1wQG+nlupJ1nBAQa8\u002f0JXscEC7ldUsXgBxQI\u002fELOOgEXFALDaY5VsgcUBqCgE1jSxxQGZGEuAyNnFAf3Z2Aks9cUAzOiXE00FxQIQFv1jLQ3FAxpz1\u002fi9DcUAAAAAAAEBxQA=="},"type":"scatter"},{"hovertemplate":"Curva: resultados_2_powerlaw045 - powerlaw (alpha=0.45)\u003cbr\u003eModelo: powerlaw\u003cbr\u003eAlpha: 0.45\u003cbr\u003eArchivo: resultados_2_powerlaw045.csv\u003cbr\u003eUtilizaci\u00f3n: %{x}%\u003cbr\u003ePotencia total: %{y:.2f} W\u003cextra\u003e\u003c\u002fextra\u003e","mode":"lines+markers","name":"\u2605 resultados_2_powerlaw045 - powerlaw (alpha=0.45)","x":{"dtype":"f8","bdata":"AAAAAAAAAAAAAAAAAAAEQAAAAAAAABRAAAAAAAAAHkAAAAAAAAAkQAAAAAAAAClAAAAAAAAALkAAAAAAAIAxQAAAAAAAADRAAAAAAACANkAAAAAAAAA5QAAAAAAAgDtAAAAAAAAAPkAAAAAAAEBAQAAAAAAAgEFAAAAAAADAQkAAAAAAAABEQAAAAAAAQEVAAAAAAACARkAAAAAAAMBHQAAAAAAAAElAAAAAAABASkAAAAAAAIBLQAAAAAAAwExAAAAAAAAATkAAAAAAAEBPQAAAAAAAQFBAAAAAAADgUEAAAAAAAIBRQAAAAAAAIFJAAAAAAADAUkAAAAAAAGBTQAAAAAAAAFRAAAAAAACgVEAAAAAAAEBVQAAAAAAA4FVAAAAAAACAVkAAAAAAACBXQAAAAAAAwFdAAAAAAABgWEAAAAAAAABZQA=="},"y":{"dtype":"f8","bdata":"AAAAAACAZEBZtfUDdilnQHfXRDXnImhAVOTJ1zzdaED+LDG0pndpQFn\u002fKYb5\u002fWlA3K6wDjF2akDrbg2L0eNqQI1OVHAgSWtAh08tp66na0DLMjA4ngBsQBTOOdrIVGxAXEw\u002f1takbECu1NBiTfFsQAIp5Q2YOm1Atjl6Iw+BbUBr6W0q\u002fMRtQGIjMh+dBm5AfqAw1CZGbkCmg1u6xoNuQCBlvj2kv25A0gux0+H5bkD+ICjPnTJvQHuzlgnzaW9AeWPAavmfb0CYJg5XxtRvQN1DAIU2BHBA3gN6cH8dcEDTrLTMRTZwQOHDosKQTnBAGa9422ZmcEBz9GoTzn1wQBTjsenLlHBAsuFKbmWrcEA\u002f7NdNn8FwQGhU69t913BAuFX\u002fGwXtcED3kU3JOAJxQJRhsV0cF3FAgIq4F7MrcUAAAAAAAEBxQA=="},"type":"scatter"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"title":{"font":{"size":24},"text":"Comparaci\u00f3n de potencia total por medici\u00f3n\u003cbr\u003e\u003csup\u003e\u2605 M\u00e1s parecido a SPEC: resultados_2_powerlaw045 - powerlaw (alpha=0.45) (RMSE=3.6528 W)\u003c\u002fsup\u003e","x":0.02,"xanchor":"left"},"xaxis":{"title":{"font":{"size":26},"text":"Utilizaci\u00f3n (%)"},"range":[-1,108],"dtick":10,"zeroline":false},"yaxis":{"title":{"font":{"size":26},"text":"Potencia total (W)"},"range":[158.38814274090873,326.74386051364706],"nticks":20,"zeroline":false},"margin":{"l":110,"r":90,"t":95,"b":70},"legend":{"font":{"size":17},"x":0.08,"y":0.98,"xanchor":"left","yanchor":"top","bgcolor":"rgba(255,255,255,0.90)","bordercolor":"rgba(0,0,0,0.25)","borderwidth":1},"paper_bgcolor":"#ffffff","plot_bgcolor":"#ffffff","hovermode":"x unified","autosize":true},                        {"responsive": true}                    )                };            </script>        </div>
+        </div>
+
+        <div id="vista-comparacion" class="vista">
+            <div class="comparacion-header">
+                <h2>Datos de comparación contra SPEC</h2>
+                <p>Conclusión: el modelo que más se aproxima a SPEC es <b>resultados_2_powerlaw045 - powerlaw (alpha=0.45)</b>, porque tiene el menor RMSE (<b>3.6528 W</b>).<br>Referencia SPEC: <b>resultados_2_spec - spec</b>. También se muestran MAE, error máximo y MAPE para completar la comparación.</p>
+            </div>
+
+            <div class="tabla-wrapper">
+                <div style="height:100%; width:100%;">                            <div id="grafica-comparacion-plotly" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("grafica-comparacion-plotly")) {                    Plotly.newPlot(                        "grafica-comparacion-plotly",                        [{"cells":{"align":"left","values":[[1,2,3],["resultados_2_powerlaw045 - powerlaw (alpha=0.45)","resultados_2_empirical21 - empirical (alpha=2.1)","resultados_2_linear - linear"],["powerlaw","empirical","linear"],["0.45","2.1","-"],[41,41,41],["3.6528","9.6919","25.0173"],["2.6748","7.7723","22.0488"],["11.2957","20.0140","38.6000"],["1.2028","3.3721","9.3376"]]},"columnwidth":[50,180,60,40,45,70,65,100,70],"domain":{"x":[0.02,0.63],"y":[0.15,0.95]},"header":{"align":"left","values":["Posici\u00f3n","Curva","Modelo","Alpha","Puntos","RMSE (W)","MAE (W)","Error m\u00e1x. (W)","MAPE (%)"]},"type":"table"}],                        {"template":{"data":{"barpolar":[{"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"white","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"#C8D4E3","linecolor":"#C8D4E3","minorgridcolor":"#C8D4E3","startlinecolor":"#2a3f5f"},"type":"carpet"}],"choropleth":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"choropleth"}],"contourcarpet":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"contourcarpet"}],"contour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"contour"}],"heatmap":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"heatmap"}],"histogram2dcontour":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2dcontour"}],"histogram2d":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"histogram2d"}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"mesh3d":[{"colorbar":{"outlinewidth":0,"ticks":""},"type":"mesh3d"}],"parcoords":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"parcoords"}],"pie":[{"automargin":true,"type":"pie"}],"scatter3d":[{"line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatter3d"}],"scattercarpet":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattercarpet"}],"scattergeo":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergeo"}],"scattergl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattergl"}],"scattermapbox":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermapbox"}],"scattermap":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scattermap"}],"scatterpolargl":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolargl"}],"scatterpolar":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterpolar"}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"scatterternary":[{"marker":{"colorbar":{"outlinewidth":0,"ticks":""}},"type":"scatterternary"}],"surface":[{"colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"type":"surface"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}]},"layout":{"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"autotypenumbers":"strict","coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]],"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]},"colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"geo":{"bgcolor":"white","lakecolor":"white","landcolor":"white","showlakes":true,"showland":true,"subunitcolor":"#C8D4E3"},"hoverlabel":{"align":"left"},"hovermode":"closest","mapbox":{"style":"light"},"paper_bgcolor":"white","plot_bgcolor":"white","polar":{"angularaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""},"bgcolor":"white","radialaxis":{"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":""}},"scene":{"xaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"yaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"},"zaxis":{"backgroundcolor":"white","gridcolor":"#DFE8F3","gridwidth":2,"linecolor":"#EBF0F8","showbackground":true,"ticks":"","zerolinecolor":"#EBF0F8"}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"ternary":{"aaxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"baxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""},"bgcolor":"white","caxis":{"gridcolor":"#DFE8F3","linecolor":"#A2B1C6","ticks":""}},"title":{"x":0.05},"xaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2},"yaxis":{"automargin":true,"gridcolor":"#EBF0F8","linecolor":"#EBF0F8","ticks":"","title":{"standoff":15},"zerolinecolor":"#EBF0F8","zerolinewidth":2}}},"margin":{"l":30,"r":30,"t":20,"b":30},"autosize":true},                        {"responsive": true}                    )                };            </script>        </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function resizePlot(plotId) {
+            const plot = document.getElementById(plotId);
+
+            if (plot && window.Plotly) {
+                Plotly.Plots.resize(plot);
+            }
+        }
+
+        function mostrarVista(vista) {
+            const vistaCurvas = document.getElementById("vista-curvas");
+            const vistaComparacion = document.getElementById("vista-comparacion");
+
+            const btnCurvas = document.getElementById("btn-curvas");
+            const btnComparacion = document.getElementById("btn-comparacion");
+
+            const leyendaMetricas = document.getElementById("leyenda-metricas");
+
+            if (vista === "curvas") {
+                vistaCurvas.classList.add("vista-activa");
+                vistaComparacion.classList.remove("vista-activa");
+
+                btnCurvas.classList.add("boton-activo");
+                btnComparacion.classList.remove("boton-activo");
+
+                leyendaMetricas.style.display = "none";
+
+                setTimeout(function() {
+                    resizePlot("grafica-curvas-plotly");
+                }, 100);
+            }
+
+            if (vista === "comparacion") {
+                vistaCurvas.classList.remove("vista-activa");
+                vistaComparacion.classList.add("vista-activa");
+
+                btnCurvas.classList.remove("boton-activo");
+                btnComparacion.classList.add("boton-activo");
+
+                leyendaMetricas.style.display = "inline-block";
+
+                setTimeout(function() {
+                    resizePlot("grafica-comparacion-plotly");
+                }, 100);
+            }
+        }
+
+        window.addEventListener("resize", function() {
+            resizePlot("grafica-curvas-plotly");
+            resizePlot("grafica-comparacion-plotly");
+        });
+
+        setTimeout(function() {
+            resizePlot("grafica-curvas-plotly");
+        }, 300);
+    </script>
+
 </body>
 </html>
