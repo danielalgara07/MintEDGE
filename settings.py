@@ -77,60 +77,60 @@ W_PER_BIT = 5.9e-9  # 5.9 nJ/bit
 MAX_LINK_CAPACITY = 10e9  # 10 Gbps
 
 """EDGE SERVERS"""
-SHARE_OF_SERVERS = 0.14 
+SHARE_OF_SERVERS = 1.00
 
 SERVERS = [
  
-    #{  # SERVER 1 - HP ProLiant DL180 G5 Intel Xeon E5450 3.00 GHz
-    #    "MAX_POWER": 244,
-    #    "IDLE_POWER": 123,
-    #    "MAX_CAPACITY": 299610,
-    #    "BOOT_TIME": 20,
+    {  # SERVER 1 - HP ProLiant DL180 G5 Intel Xeon E5450 3.00 GHz
+        "MAX_POWER": 244,
+        "IDLE_POWER": 123,
+        "MAX_CAPACITY": 299610,
+        "BOOT_TIME": 20,
 
-    #    "SPEC_POWER_CURVE": [
-    #        (0, 123),
-    #        (10, 142),
-    #        (20, 158),
-    #        (30, 173),
-    #        (40, 188),
-    #        (50, 201),
-    #        (60, 212),
-    #        (70, 222),
-    #        (80, 230),
-    #        (90, 238),
-    #        (100, 244),
-    #    ],
+        "SPEC_POWER_CURVE": [
+            (0, 123),
+            (10, 142),
+            (20, 158),
+            (30, 173),
+            (40, 188),
+            (50, 201),
+            (60, 212),
+            (70, 222),
+            (80, 230),
+            (90, 238),
+            (100, 244),
+        ],
 
-    #    "CAPACITANCE": 0.1e-7,
-    #    "ACTIVITY_FACTOR": 1,
+        "CAPACITANCE": 0.1e-7,
+        "ACTIVITY_FACTOR": 1,
 
-    #    "FREQUENCIES": [2.00e9,2.33e9,2.67e9,3.00e9,],
-    #    "VOLTAGES": [0.85,1.00,1.17,1.35,],
-    #},
+        "FREQUENCIES": [2.00e9,2.33e9,2.67e9,3.00e9,],
+        "VOLTAGES": [0.85,1.00,1.17,1.35,],
+    },
 
     
 
-    {  # SERVER 2 - Dell PowerEdge R7725 - AMD EPYC 9965, 2 chips, 384 cores total
-        "MAX_POWER": 861,
-        "IDLE_POWER": 138,
-        "MAX_CAPACITY": 40017802,  # SPECpower_ssj2008 ssj_ops @ 100%
-        "BOOT_TIME": 20,
-        "SPEC_POWER_CURVE": [
-            (0, 138),
-            (10, 297),
-            (20, 367),
-            (30, 438),
-            (40, 515),
-            (50, 593),
-            (60, 661),
-            (70, 710),
-            (80, 771),
-            (90, 812),
-            (100, 861),
-        ],
-        "ACTIVITY_FACTOR": 1.0,
-        "CAPACITANCE": None,
-    },
+    #{  # SERVER 2 - Dell PowerEdge R7725 - AMD EPYC 9965, 2 chips, 384 cores total
+    #    "MAX_POWER": 861,
+    #    "IDLE_POWER": 138,
+    #    "MAX_CAPACITY": 40017802,  # SPECpower_ssj2008 ssj_ops @ 100%
+    #    "BOOT_TIME": 20,
+    #    "SPEC_POWER_CURVE": [
+    #        (0, 138),
+    #        (10, 297),
+    #        (20, 367),
+    #        (30, 438),
+    #        (40, 515),
+    #        (50, 593),
+    #        (60, 661),
+    #        (70, 710),
+    #        (80, 771),
+    #        (90, 812),
+    #        (100, 861),
+    #    ],
+    #    "ACTIVITY_FACTOR": 1.0,
+    #    "CAPACITANCE": None,
+    #},
 
     # {  # SERVER 3 - Colfax International CX2266-N2 - AMD Opteron 2216HE, 2 chips, 4 cores total
        #  "MAX_POWER": 276,
@@ -206,27 +206,14 @@ PEDESTRIAN_SERVICES = ["augmented_reality", "virtual_reality"]
 STATIONARY_SERVICES = ["video_analysis"]
 
 SERVICES = [
-    # name, workload(ops/s), lambda(req/s), vin(bytes), vout(bytes), delay_budget(seconds)
-    #
-    # CONNECTED VEHICLES
-    Service("connected_vehicles", 14000, 10, 1600, 100, 5e-3), 
-    # AUGMENTED REALITY
-    Service("augmented_reality", 50000, 0.5, 1500 * 1024, 25 * 1024, 15e-3), 
-    # VIDEO ANALYSIS
-    Service("video_analysis", 30000, 6, 1500 * 1024, 20, 30e-3), 
-]
-
-
-SERVICES = [
     # name, workload(ops/request), lambda(req/s), vin(bytes), vout(bytes), delay_budget(seconds)
-    #
-    # CONNECTED VEHICLES
-    Service("connected_vehicles", 14040, 10, 100, 50, 5e-3),
-    # AUGMENTED REALITY
-    Service("augmented_reality", 50150, 0.5, 100, 50, 15e-3),
-    # VIDEO ANALYSIS
-    Service("video_analysis", 30090, 6, 100, 50, 30e-3),
+
+    Service("connected_vehicles", 760, 10, 100, 50, 5e-3),
+    Service("augmented_reality", 2700, 0.5, 100, 50, 15e-3),
+    Service("video_analysis", 1620, 6, 100, 50, 30e-3),
 ]
+
+
 # -------------------ENERGY MODELS---------------------------
 #------------------------------------------------------------
 # linear model: P = P_idle + (P_max - P_idle) * utilization
@@ -237,5 +224,5 @@ SERVICES = [
 
 # Alpha i s a parameter of calibration for the power law and empirical models.                                                     
 # modelos posibles: "linear", "powerlaw"(pasarle alpha), "empirical"(pasarle alpha), "frequency" , "spec_linear_interpolation" 
-SERVER_ENERGY_MODEL = "empirical"
-ALPHA = 1.45
+SERVER_ENERGY_MODEL = "powerlaw"
+ALPHA = 0.7
