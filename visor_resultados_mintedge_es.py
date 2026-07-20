@@ -82,14 +82,19 @@ def calcular_energia_por_hora(datos):
     ).astype(int)
 
     resultado = datos_horarios.groupby("hora_ejecucion").agg(
-        energia_Wh=("potencia_total_W", lambda valores: valores.sum() / 3600),
+        energia_total_J=("potencia_total_W", "sum"),
         potencia_media_W=("potencia_total_W", "mean"),
         potencia_minima_W=("potencia_total_W", "min"),
         potencia_maxima_W=("potencia_total_W", "max"),
     )
 
-    resultado["cambio_porcentual"] = resultado["energia_Wh"].pct_change() * 100
-    resultado["diferencia_Wh"] = resultado["energia_Wh"].diff()
+    
+    resultado["cambio_porcentual"] = (
+        resultado["energia_total_J"].pct_change() * 100
+    )
+
+    resultado["diferencia_J"] = resultado["energia_total_J"].diff()
+
 
     return resultado.reset_index()
 
@@ -188,7 +193,7 @@ class NavegadorGraficas:
 
     def dibujar_energia_por_hora(self):
         horas = self.datos_horarios["hora_ejecucion"].to_numpy()
-        energia = self.datos_horarios["energia_Wh"].to_numpy()
+        energia = self.datos_horarios["energia_total_J"].to_numpy()
 
         columnas  = self.eje.bar(
             horas,
@@ -236,10 +241,10 @@ class NavegadorGraficas:
             self.eje.text(
                 centro_columna,
                 parte_superior - separacion_texto,
-                f"{valor:.2f}",
+                f"{valor:.0f}",
                 ha="center",
                 va="top",
-                fontsize=13.5,
+                fontsize=11.8,
                 fontweight="bold",
                 color="black",
                 zorder=5,
@@ -251,7 +256,7 @@ class NavegadorGraficas:
             fontweight="bold",
         )
         self.eje.set_xlabel("Hora de ejecución", labelpad=14)
-        self.eje.set_ylabel("Energía consumida (Wh)", labelpad=14)
+        self.eje.set_ylabel("Energía total consumida (J)", labelpad=14)
         self.eje.set_xticks(horas)
         self.eje.grid(axis="y", alpha=0.30, zorder=1)
         self.eje.legend(
@@ -267,10 +272,10 @@ class NavegadorGraficas:
         informe["hora_ejecucion"] = informe["hora_ejecucion"].map(
             lambda valor: f"Hora {valor}"
         )
-        informe["energia_Wh"] = informe["energia_Wh"].map(
-            lambda valor: f"{valor:.2f}"
+        informe["energia_total_J"] = informe["energia_total_J"].map(
+        lambda valor: f"{valor:.2f}"
         )
-        informe["diferencia_Wh"] = informe["diferencia_Wh"].map(
+        informe["diferencia_J"] = informe["diferencia_J"].map(
             lambda valor: "-" if pd.isna(valor) else f"{valor:+.2f}"
         )
         informe["cambio_porcentual"] = informe["cambio_porcentual"].map(
@@ -289,8 +294,8 @@ class NavegadorGraficas:
         # No se incluye ninguna columna de segundos. Cada hora siempre es 3600 s.
         columnas = [
             "hora_ejecucion",
-            "energia_Wh",
-            "diferencia_Wh",
+            "energia_total_J",
+            "diferencia_J",
             "cambio_porcentual",
             "potencia_media_W",
             "potencia_minima_W",
@@ -298,8 +303,8 @@ class NavegadorGraficas:
         ]
         etiquetas = [
             "Hora",
-            "Energía\n(Wh)",
-            "Diferencia\n(Wh)",
+            "Energía\n(J)",
+            "Diferencia\n(J)",
             "Variación",
             "Potencia\nmedia (W)",
             "Potencia\nmínima (W)",
