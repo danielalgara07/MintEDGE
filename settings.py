@@ -237,5 +237,5 @@ SERVICES = [
 
 # Alpha i s a parameter of calibration for the power law and empirical models.                                                     
 # modelos posibles: "linear", "powerlaw"(pasarle alpha), "empirical"(pasarle alpha), "frequency" , "spec_linear_interpolation" 
-SERVER_ENERGY_MODEL = "spec_linear_interpolation"
-ALPHA = 1.4
+SERVER_ENERGY_MODEL = "empirical"
+ALPHA = 1.45
