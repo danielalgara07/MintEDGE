@@ -77,36 +77,36 @@ W_PER_BIT = 5.9e-9  # 5.9 nJ/bit
 MAX_LINK_CAPACITY = 10e9  # 10 Gbps
 
 """EDGE SERVERS"""
-SHARE_OF_SERVERS = 1.00
+SHARE_OF_SERVERS = 1
 
 SERVERS = [
  
-    {  # SERVER 1 - HP ProLiant DL180 G5 Intel Xeon E5450 3.00 GHz
-        "MAX_POWER": 244,
-        "IDLE_POWER": 123,
-        "MAX_CAPACITY": 299610,
-        "BOOT_TIME": 20,
+    #{  # SERVER 1 - HP ProLiant DL180 G5 Intel Xeon E5450 3.00 GHz
+    #    "MAX_POWER": 244,
+    #    "IDLE_POWER": 123,
+#        "MAX_CAPACITY": 299610,
+    #    "BOOT_TIME": 20,
 
-        "SPEC_POWER_CURVE": [
-            (0, 123),
-            (10, 142),
-            (20, 158),
-            (30, 173),
-            (40, 188),
-            (50, 201),
-            (60, 212),
-            (70, 222),
-            (80, 230),
-            (90, 238),
-            (100, 244),
-        ],
+     #   "SPEC_POWER_CURVE": [
+     #       (0, 123),
+     #       (10, 142),
+     #       (20, 158),
+     #       (30, 173),
+     #       (40, 188),
+     #       (50, 201),
+     #       (60, 212),
+     #       (70, 222),
+     #       (80, 230),
+     #       (90, 238),
+     #       (100, 244),
+     #   ],
 
-        "CAPACITANCE": 0.1e-7,
-        "ACTIVITY_FACTOR": 1,
+      #  "CAPACITANCE": 0.1e-7,
+      #  "ACTIVITY_FACTOR": 1,
 
-        "FREQUENCIES": [2.00e9,2.33e9,2.67e9,3.00e9,],
-        "VOLTAGES": [0.85,1.00,1.17,1.35,],
-    },
+      #  "FREQUENCIES": [2.00e9,2.33e9,2.67e9,3.00e9,],
+      #  "VOLTAGES": [0.85,1.00,1.17,1.35,],
+    #},
 
     
 
@@ -133,25 +133,25 @@ SERVERS = [
     #},
 
     # {  # SERVER 3 - Colfax International CX2266-N2 - AMD Opteron 2216HE, 2 chips, 4 cores total
-       #  "MAX_POWER": 276,
-       #  "IDLE_POWER": 164,
-       #  "MAX_CAPACITY": 95853,  # SPECpower_ssj2008 ssj_ops @ 100%
-       #  "BOOT_TIME": 20,
-       #  "SPEC_POWER_CURVE": [
-       #      (0, 164),
-       #      (10, 204),
-       #      (20, 225),
-       #      (30, 234),
-       #      (40, 242),
-       #      (50, 248),
-       #      (60, 254),
-       #      (70, 260),
-       #      (80, 267),
-       #      (90, 272),
-       #      (100, 276),
-       #   ],
-       # "ACTIVITY_FACTOR": 1.0,
-       #  "CAPACITANCE": None,
+    #     "MAX_POWER": 276,
+    ##     "IDLE_POWER": 164,
+     #    "MAX_CAPACITY": 95853,  # SPECpower_ssj2008 ssj_ops @ 100%
+     ##    "BOOT_TIME": 20,
+     #    "SPEC_POWER_CURVE": [
+     #        (0, 164),
+     ##        (10, 204),
+     ##        (20, 225),
+     #        (30, 234),
+     ##        (40, 242),
+     #        (50, 248),
+     #        (60, 254),
+     #        (70, 260),
+     #        (80, 267),
+     #        (90, 272),
+     #        (100, 276),
+     #     ],
+     #   "ACTIVITY_FACTOR": 1.0,
+     #    "CAPACITANCE": None,
      # },
 
     #{ #SERVER 4 - ASUSTeK RS720A-E13-RS8U - AMD EPYC 9965, 2 chips, 384 cores total
@@ -177,26 +177,27 @@ SERVERS = [
     #},
 
 
-    # {  # SERVER 5 - HPE ProLiant ML350 Gen11 - Intel Xeon Platinum 8592+, 2 chips, 128 cores total
-    #     "MAX_POWER": 629,
-    #     "IDLE_POWER": 232,
-    #     "MAX_CAPACITY": 13338557,  # SPECpower_ssj2008 ssj_ops @ 100%
-    #     "SPEC_POWER_CURVE": [
-    #         (0, 232),
-    #         (10, 270),
-    #         (20, 309),
-    #         (30, 346),
-    #         (40, 382),
-    #         (50, 421),
-    #         (60, 462),
-    #         (70, 504),
-    #         (80, 553),
-    #         (90, 595),
-    #         (100, 629),
-    #     ],
-    #    "ACTIVITY_FACTOR": 1.0,
-    #     "CAPACITANCE": None,
-    # },
+     # {  # SERVER 5 - HPE ProLiant ML350 Gen11 - Intel Xeon Platinum 8592+, 2 chips, 128 cores total
+     #     "MAX_POWER": 629,
+      #    "IDLE_POWER": 232,
+      #    "MAX_CAPACITY": 13338557,  # SPECpower_ssj2008 ssj_ops @ 100%
+      #    "BOOT_TIME": 20,
+      #    "SPEC_POWER_CURVE": [
+       #       (0, 232),
+       #       (10, 270),
+       #       (20, 309),
+       #       (30, 346),
+       #       (40, 382),
+       #       (50, 421),
+       #       (60, 462),
+       #       (70, 504),
+       #       (80, 553),
+       #       (90, 595),
+        #      (100, 629),
+      #    ],
+      #   "ACTIVITY_FACTOR": 1.0,
+       #   "CAPACITANCE": None,
+     # },
 ]
 
 
@@ -206,11 +207,9 @@ PEDESTRIAN_SERVICES = ["augmented_reality", "virtual_reality"]
 STATIONARY_SERVICES = ["video_analysis"]
 
 SERVICES = [
-    # name, workload(ops/request), lambda(req/s), vin(bytes), vout(bytes), delay_budget(seconds)
-
-    Service("connected_vehicles", 760, 10, 100, 50, 5e-3),
-    Service("augmented_reality", 2700, 0.5, 100, 50, 15e-3),
-    Service("video_analysis", 1620, 6, 100, 50, 30e-3),
+    Service("connected_vehicles", 270, 10, 100, 50, 5e-3),
+    Service("augmented_reality", 950, 0.5, 100, 50, 15e-3),
+    Service("video_analysis", 530, 6, 100, 50, 30e-3),
 ]
 
 
@@ -224,5 +223,5 @@ SERVICES = [
 
 # Alpha i s a parameter of calibration for the power law and empirical models.                                                     
 # modelos posibles: "linear", "powerlaw"(pasarle alpha), "empirical"(pasarle alpha), "frequency" , "spec_linear_interpolation" 
-SERVER_ENERGY_MODEL = "powerlaw"
+SERVER_ENERGY_MODEL = "linear"
 ALPHA = 0.7
