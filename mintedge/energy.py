@@ -236,7 +236,7 @@ class EnergyModelServerFrequency(EnergyModel):
         return EnergyMeasurement(dynamic=dynamic_power, idle=self.server.idle_power)
     
 
-#----------Modelo potencia de servidor 4 (interpolación lineal específica)-----
+#----------Modelo potencia de servidor 4 (interpolación lineal SPEC)-----
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 

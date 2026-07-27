@@ -21,7 +21,7 @@ from pathlib import Path
 from shutil import which
 
 import mintedge
-import settings as settings
+import settings 
 
 
 class MintEDGESettingsError(Exception):
